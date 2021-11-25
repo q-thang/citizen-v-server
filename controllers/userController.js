@@ -68,7 +68,6 @@ const createUser = async (req, res) => {
 }
 
 const updateUserById = async (req, res) => {
-  let { username } = req.user
   let { idUser } = req.params
   let { newUsername, newPassword, active } = req.body
   try {
