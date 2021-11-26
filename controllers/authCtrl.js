@@ -5,14 +5,15 @@ const jwt = require("jsonwebtoken");
 const authCtrl = {
   register: async (req, res) => {
     try {
-      const { username, email, password } = req.body;
+      const { username, password, regency, active } = req.body;
 
       const passwordHash = await bcrypt.hash(password, 12);
 
       const newUser = new User({
         username,
-        email,
         password: passwordHash,
+        regency,
+        active,
       });
 
       const access_token = createAccessToken({
@@ -46,13 +47,13 @@ const authCtrl = {
 
   login: async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { username, password } = req.body;
 
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ username });
 
       if (!user) {
         return res.status(400).json({
-          msg: "Xin lỗi, không tìm thấy tài khoản phù hợp với email của bạn, xin vui lòng nhập 1 email khác!",
+          msg: "Xin lỗi, không tìm thấy mã đơn vị phù hợp với mã đơn vị của bạn!",
         });
       }
 
