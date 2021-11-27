@@ -57,6 +57,14 @@ const authCtrl = {
         });
       }
 
+      if (user.regency !== "A1") {
+        if (user.regency.length !== username.length) {
+          return res.status(400).json({
+            msg: "Độ dài tài khoản không phù hợp với độ dài mã đơn vị đã được cấp.",
+          });
+        }
+      }
+
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(400).json({
