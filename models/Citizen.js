@@ -7,7 +7,7 @@ const CitizenSchema = new mongoose.Schema(
       required: true,
     },
     dateOfBirth: {
-      type: Date,
+      type: String,
       required: true,
     },
     currentAddress: {
@@ -21,6 +21,7 @@ const CitizenSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       required: false,
+      unique: true,
     },
     identifiedCode: {
       type: String,

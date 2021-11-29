@@ -16,6 +16,7 @@ const getAllUser = async (req, res) => {
 const getChildUser = async (req, res) => {
   let { username, regency } = req.user
   try {
+    if (regency === 'A1') username = ''
     let childRegency = getChildRegency(regency)
     let users = await User.find({ username: { $regex: username + '.*' }, regency: childRegency })
     users = users.map(u => ({ ...u._doc, password: null }))
@@ -69,13 +70,14 @@ const createUser = async (req, res) => {
 
 const updateUserById = async (req, res) => {
   let { idUser } = req.params
-  let { newUsername, newPassword, active } = req.body
+  let { newPassword, active, startTime, endTime } = req.body
   try {
     newPassword = await bcript.hash(newPassword, 10)
     let dataUser = {
-      username: newUsername,
       password: newPassword,
-      active
+      active,
+      startTime,
+      endTime,
     }
     let updatedUser = await User.findByIdAndUpdate(idUser, dataUser)
     res.status(200).json(updatedUser)

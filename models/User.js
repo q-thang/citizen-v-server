@@ -10,6 +10,8 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      minlength: 8,
+      maxlength: 60,
     },
     regency: {
       type: String,
@@ -17,6 +19,12 @@ const UserSchema = new mongoose.Schema(
     },
     active: {
       type: Boolean,
+    },
+    startTime: {
+      type: Date
+    },
+    endTime: {
+      type: Date
     },
   },
   {

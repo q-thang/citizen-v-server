@@ -1,10 +1,18 @@
-const router = require('express').Router()
-const citizenCtrl = require('../controllers/citizenController')
+const router = require("express").Router();
+const citizenCtrl = require("../controllers/citizenController");
 
-router.get('/', citizenCtrl.getAllCitizen)
-router.get('/:idcitizen', citizenCtrl.getCitizenById)
-router.post('/', citizenCtrl.createCitizen)
-router.put('/:idcitizen', citizenCtrl.updateCitizenById)
-router.delete('/:idcitizen', citizenCtrl.deleteCitizenById)
+router.get("/citizen", citizenCtrl.getAllCitizen);
 
-module.exports = router
+router.post("/citizen/findCitizen", citizenCtrl.findCitizen);
+
+router.post("/citizen/findCitizens", citizenCtrl.findCitizens);
+
+router.get("/citizen/:idCitizen", citizenCtrl.getCitizenById);
+
+router.post("/citizen", citizenCtrl.createCitizen);
+
+router.patch("/citizen/:idCitizen", citizenCtrl.updateCitizenById);
+
+router.delete("/citizen/:idCitizen", citizenCtrl.deleteCitizenById);
+
+module.exports = router;
