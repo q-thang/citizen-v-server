@@ -72,7 +72,9 @@ const updateUserById = async (req, res) => {
   let { idUser } = req.params
   let { newPassword, active, startTime, endTime } = req.body
   try {
-    newPassword = await bcript.hash(newPassword, 10)
+    if (newPassword) {
+      newPassword = await bcript.hash(newPassword, 10)
+    }
     let dataUser = {
       password: newPassword,
       active,
@@ -80,6 +82,10 @@ const updateUserById = async (req, res) => {
       endTime,
     }
     let updatedUser = await User.findByIdAndUpdate(idUser, dataUser)
+    await User.updateMany(
+      { username: { $regex: updatedUser.username + '.*' } },
+      { active, startTime, endTime }
+    )
     res.status(200).json(updatedUser)
   } catch(err) {
     console.log(`Update user error: ${err}`)
