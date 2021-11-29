@@ -35,7 +35,7 @@ app.use(cookieParser());
 
 // ROUTES
 app.use("/api", require("./routes/authRouter"));
-app.use(auth)
+app.use(auth);
 app.use("/api", require("./routes/unitRouter"));
 app.use("/api", require("./routes/userRouter"));
 app.use("/api", require("./routes/citizenRouter"));
