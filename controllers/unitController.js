@@ -41,7 +41,7 @@ const createUnit = async (req, res) => {
     let newUnit = new Unit()
     newUnit.nameOfUnit = nameOfUnit
     newUnit.code = code
-    newUnit.idParent = parentUnit._id
+    if (parentUnit) newUnit.idParent = parentUnit._id
 
     await newUnit.save()
     res.status(200).json(newUnit)
