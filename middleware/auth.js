@@ -24,7 +24,7 @@ const auth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    return res.status(500).json({ msg: err.message });
+    return res.status(401).json({ msg: "Xác thực không thành công!" });
   }
 };
 

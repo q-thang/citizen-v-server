@@ -57,14 +57,6 @@ const authCtrl = {
         });
       }
 
-      if (user.regency !== "A1") {
-        if (user.regency.length !== username.length) {
-          return res.status(400).json({
-            msg: "Độ dài tài khoản không phù hợp với độ dài mã đơn vị đã được cấp.",
-          });
-        }
-      }
-
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(400).json({
@@ -111,18 +103,18 @@ const authCtrl = {
     try {
       const rf_token = req.cookies.refreshtoken;
       if (!rf_token)
-        return res.status(400).json({ msg: "Vui lòng đăng nhập." });
+        return res.status(402).json({ msg: "Vui lòng đăng nhập." });
 
       jwt.verify(
         rf_token,
         process.env.REFRESH_TOKEN_SECRET,
         async (err, result) => {
-          if (err) return res.status(400).json({ msg: "Vui lòng đăng nhập." });
+          if (err) return res.status(402).json({ msg: "Vui lòng đăng nhập." });
 
           const user = await User.findById(result.id).select("-password");
 
           if (!user) {
-            return res.status(400).json({ msg: "Người dùng không tồn tại." });
+            return res.status(402).json({ msg: "Người dùng không tồn tại." });
           }
 
           const access_token = createAccessToken({ id: result.id });
@@ -135,7 +127,7 @@ const authCtrl = {
         }
       );
     } catch (err) {
-      return res.status(500).json({ msg: err.message });
+      return res.status(402).json({ msg: err.message });
     }
   },
 };
