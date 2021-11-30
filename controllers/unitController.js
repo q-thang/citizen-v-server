@@ -35,10 +35,13 @@ const getChildUnit = async (req, res) => {
 }
 
 const getUnitById = async (req, res) => {
-  let { username } = req.user
+  let { username, regency } = req.user
   let { idUnit } = req.params
   try {
     let unit = await Unit.findById(idUnit)
+    if (regency === 'A1') {
+      return res.status(200).json(unit)
+    }
     let regex = new RegExp(`/^${username}\d{2}/`)
     if (regex.test(unit.code)) {
       res.status(200).json(unit)
@@ -79,9 +82,17 @@ const createUnit = async (req, res) => {
 }
 
 const updateUnitById = async (req, res) => {
+  let { username, regency } = req.user
   let { idUnit } = req.params
   let { nameOfUnit, code } = req.body
   try {
+    if (regency === 'A1') {
+      let updatedUnit = await Unit.findByIdAndUpdate(idUnit, {
+        nameOfUnit,
+        code
+      })
+      return res.status(200).json({ msg: 'Cập nhật thành công!', data: updatedUnit })
+    }
     let oldUnit = await Unit.findById(idUnit)
     if (!oldUnit) {
       return res.statsu(400).json({ msg: 'Đơn vị không tồn tại!' })
@@ -92,7 +103,7 @@ const updateUnitById = async (req, res) => {
         nameOfUnit,
         code
       })
-      res.status(200).json(updatedUnit)
+      res.status(200).json({ msg: 'Cập nhật thành công!', data: updatedUnit })
     } else {
       res.status(400).json({ msg: 'Not allowed!' })
     }
@@ -103,8 +114,13 @@ const updateUnitById = async (req, res) => {
 }
 
 const deleteUnitById = async (req, res) => {
+  let { username, regency } = req.user
   let { idUnit } = req.params
   try {
+    if (regency === 'A1') {
+      await Unit.findByIdAndDelete(idUnit)
+      return res.status(200).json({ msg: 'Delete successfully' })
+    }
     let oldUnit = await Unit.findById(idUnit)
     if (!oldUnit) {
       return res.status(400).json({ msg: 'Invalid Unit id!' })
