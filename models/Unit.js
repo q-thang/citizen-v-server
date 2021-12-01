@@ -9,6 +9,7 @@ const UnitSchema = new mongoose.Schema(
     code: {
       type: String,
       required: true,
+      unique: true,
     },
     idParent: {
       type: mongoose.Types.ObjectId,

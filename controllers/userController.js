@@ -3,10 +3,13 @@ const bcript = require('bcrypt')
 const { getChildRegency } = require('../functions')
 
 const getAllUser = async (req, res) => {
+  let { regency } = req.user
   try {
-    let users = await User.find({})
-    users = users.map(u => ({ ...u._doc, password: null }))
-    res.status(200).json(users)
+    if (regency === 'A1') {
+      let users = await User.find({})
+      users = users.map(u => ({ ...u._doc, password: null }))
+      res.status(200).json(users)
+    }
   } catch(err) {
     console.log(`Get all user error: ${err}`)
     res.status(400).json({ message: 'Get error' })
@@ -16,6 +19,9 @@ const getAllUser = async (req, res) => {
 const getChildUser = async (req, res) => {
   let { username, regency } = req.user
   try {
+    if (regency === 'A1') {
+      username = ''
+    }
     let childRegency = getChildRegency(regency)
     let users = await User.find({ username: { $regex: username + '.*' }, regency: childRegency })
     users = users.map(u => ({ ...u._doc, password: null }))
@@ -27,10 +33,20 @@ const getChildUser = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
+  let { username, regency } = req.user
   let { idUser } = req.params
   try {
     let user = await User.findById(idUser)
-    res.status(200).json(user)
+    if (regency === 'A1') {
+      return res.status(200).json(user)
+    }
+    let regex = new RegExp(`/^${username}\d{2}/`)
+    let child_regency = getChildRegency(regency)
+    if (regex.test(user.username) && user.regency === child_regency) {
+      res.status(200).json(user)
+    } else {
+      res.status(400).json({ msg: 'Not allowed!' })
+    }
   } catch(err) {
     console.log(`Get user error: ${err}`)
     res.status(400).json({ message: 'Invalid Id user!' })
@@ -38,16 +54,22 @@ const getUserById = async (req, res) => {
 }
 
 const createUser = async (req, res) => {
-  let { username, password } = req.body
   let { regency } = req.user
+  let parent_username = req.user.username
+  let { username, password } = req.body
   try {
     let newRegency = getChildRegency(regency)
-
     if (username && password) {
       let checkName = await User.findOne({ username })
       if (checkName) {
-        return res.status(400).json({ message: 'Username exists!' })
+        return res.status(400).json({ message: 'Tên tài khoản đã tồn tại!' })
       }
+      if (regency !== 'A1') {
+        let regex = new RegExp(`/^${parent_username}\d{2}/`)
+        if (!regex.test(username)) {
+          return res.status(400).json({ msg: 'Tên tài khoản không hợp lệ!' })
+        }
+      } 
       password = await bcript.hash(password, 10)
       let newUser = new User()
       newUser.username = username
@@ -68,17 +90,33 @@ const createUser = async (req, res) => {
 }
 
 const updateUserById = async (req, res) => {
+  let { username, regency } = req.user 
   let { idUser } = req.params
-  let { newUsername, newPassword, active } = req.body
+  let { newPassword, active, startTime, endTime } = req.body
   try {
-    newPassword = await bcript.hash(newPassword, 10)
+    let user = await User.findById(idUser)
+    if (regency !== 'A1') {
+      let regex = new RegExp(`/^${username}\d{2}/`)
+      if (!regex.test(user.username)) {
+        return res.status(400).json({ msg: 'Not allowed!' })
+      }
+    }
+
+    if (newPassword) {
+      newPassword = await bcript.hash(newPassword, 10)
+    }
     let dataUser = {
-      username: newUsername,
       password: newPassword,
-      active
+      active,
+      startTime,
+      endTime,
     }
     let updatedUser = await User.findByIdAndUpdate(idUser, dataUser)
-    res.status(200).json(updatedUser)
+    await User.updateMany(
+      { username: { $regex: updatedUser.username + '.*' } },
+      { active, startTime, endTime }
+    )
+    return res.status(200).json(updatedUser)
   } catch(err) {
     console.log(`Update user error: ${err}`)
     res.status(400).json({ message: 'Update error' })
@@ -86,8 +124,16 @@ const updateUserById = async (req, res) => {
 }
 
 const deleteUserById = async (req, res) => {
+  let { username, regency } = req.user
   let { idUser } = req.params
   try {
+    let user = await User.findById(idUser)
+    if (regency !== 'A1') {
+      let regex = new RegExp(`/^${username}\d{2}/`)
+      if (!regex.test(user.username)) {
+        return res.status(400).json({ msg: 'Not allowed!' })
+      }
+    }
     await User.findByIdAndDelete(idUser)
     res.status(200).json({ message: 'Delete successfully!' })
   } catch(err) {

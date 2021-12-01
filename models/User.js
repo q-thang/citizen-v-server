@@ -20,6 +20,12 @@ const UserSchema = new mongoose.Schema(
     active: {
       type: Boolean,
     },
+    startTime: {
+      type: Date
+    },
+    endTime: {
+      type: Date
+    },
   },
   {
     timestamps: true,

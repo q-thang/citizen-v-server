@@ -13,18 +13,18 @@ const auth = async (req, res, next) => {
       token = req.header("Authorization");
     }
     if (!token)
-      return res.status(400).json({ msg: "Xác thực không thành công!" });
+      return res.status(401).json({ msg: "Xác thực không thành công!" });
 
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     if (!decoded)
-      return res.status(400).json({ msg: "Xác thực không thành công!" });
+      return res.status(401).json({ msg: "Xác thực không thành công!" });
 
     const user = await User.findOne({ _id: decoded.id });
 
     req.user = user;
     next();
   } catch (err) {
-    return res.status(500).json({ msg: err.message });
+    return res.status(401).json({ msg: "Xác thực không thành công!" });
   }
 };
 
