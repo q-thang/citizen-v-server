@@ -8,7 +8,7 @@ const citizenCtrl = {
     } catch (err) {
       console.log(`Get all citizen error: ${err}`);
       res.status(400).json({
-        message: "Đã có lỗi xảy ra khi lấy thông tin của tất cả công dân.",
+        msg: "Đã có lỗi xảy ra khi lấy thông tin của tất cả công dân.",
       });
     }
   },
@@ -20,7 +20,7 @@ const citizenCtrl = {
       res.status(200).json(citizen);
     } catch (err) {
       console.log(`Get citizen error: ${err}`);
-      res.status(400).json({ message: "Get error" });
+      res.status(400).json({ msg: "Get error" });
     }
   },
 
@@ -33,7 +33,7 @@ const citizenCtrl = {
 
     if (!citizenFound) {
       res.status(400).json({
-        message: "Không thể tìm thấy công dân nào có định danh như yêu cầu.",
+        msg: "Không thể tìm thấy công dân nào có định danh như yêu cầu.",
       });
     } else {
       res.status(200).json(citizenFound);
@@ -48,10 +48,43 @@ const citizenCtrl = {
       occupation,
       ethnic,
       religion,
-      idUnit,
+      location,
     } = req.body;
 
-    const criteria = {};
+    console.log(req.body);
+
+    let criteria = {};
+
+    if (location) {
+      const { city, district, ward, village } = location;
+      if (city) {
+        criteria = {
+          ...criteria,
+          "location.city": city,
+        };
+      }
+
+      if (district) {
+        criteria = {
+          ...criteria,
+          "location.district": district,
+        };
+      }
+
+      if (ward) {
+        criteria = {
+          ...criteria,
+          "location.ward": ward,
+        };
+      }
+
+      if (village) {
+        criteria = {
+          ...criteria,
+          "location.village": village,
+        };
+      }
+    }
 
     if (fullName) {
       criteria.fullName = { $regex: new RegExp(fullName, "i") };
@@ -77,17 +110,11 @@ const citizenCtrl = {
       criteria.religion = religion; // dropdown get value
     }
 
-    // if (idUnit) {
-    //   criteria.idUnit = {
-
-    //   }
-    // }
-
     const citizensFound = await Citizen.find(criteria);
 
     if (!citizensFound) {
       res.status(400).json({
-        message: "Không thể tìm thấy công dân nào có định danh như yêu cầu.",
+        msg: "Không thể tìm thấy công dân nào có định danh như yêu cầu.",
       });
     } else {
       res.status(200).json(citizensFound);
@@ -100,12 +127,13 @@ const citizenCtrl = {
       dateOfBirth,
       currentAddress,
       gender,
+      email,
       phoneNumber,
       identifiedCode,
       occupation,
       ethnic,
       religion,
-      idUnit,
+      location,
     } = req.body;
     try {
       const newCitizen = new Citizen({
@@ -114,11 +142,12 @@ const citizenCtrl = {
         currentAddress,
         gender,
         phoneNumber,
+        email,
         identifiedCode,
         occupation,
         ethnic,
         religion,
-        idUnit,
+        location,
       });
 
       const existed_idCode = await Citizen.findOne({ identifiedCode });
@@ -143,7 +172,7 @@ const citizenCtrl = {
     } catch (err) {
       console.log(`Create citizen error: ${err}`);
       res.status(400).json({
-        message: "Đã có lỗi xảy ra khi tạo mới thông tin về công dân này.",
+        msg: "Đã có lỗi xảy ra khi tạo mới thông tin về công dân này.",
       });
     }
   },
@@ -203,7 +232,7 @@ const citizenCtrl = {
     } catch (err) {
       console.log(`Update citizen error: ${err}`);
       res.status(400).json({
-        message: "Đã có lỗi xảy ra khi cập nhật thông tin về công dân này.",
+        msg: "Đã có lỗi xảy ra khi cập nhật thông tin về công dân này.",
       });
     }
   },
@@ -215,7 +244,7 @@ const citizenCtrl = {
     } catch (err) {
       console.log(`Delete citizen error: ${err}`);
       res.status(400).json({
-        message: "Đã có lỗi xảy ra khi xoá thông tin về công dân này.",
+        msg: "Đã có lỗi xảy ra khi xoá thông tin về công dân này.",
       });
     }
   },

@@ -21,7 +21,11 @@ const CitizenSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       required: false,
-      unique: true,
+      unique: false,
+    },
+    email: {
+      type: String,
+      required: false,
     },
     identifiedCode: {
       type: String,
@@ -38,18 +42,38 @@ const CitizenSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    location: {
+      city: {
+        type: String,
+        required: true,
+      },
+      district: {
+        type: String,
+        required: true,
+      },
+      ward: {
+        type: String,
+        required: true,
+      },
+      village: {
+        type: String,
+        required: false,
+      },
+    },
     religion: {
       type: String,
-      required: true,
-    },
-    idUnit: {
-      type: mongoose.Types.ObjectId,
-      ref: "Unit",
+      required: false,
     },
   },
   {
     timestamps: true,
   }
 );
+
+CitizenSchema.index({
+  "location.city": 1,
+  "location.district": 1,
+  "location.ward": 1,
+});
 
 module.exports = mongoose.model("Citizen", CitizenSchema);
