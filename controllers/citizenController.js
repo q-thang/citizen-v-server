@@ -158,7 +158,8 @@ const citizenCtrl = {
       }
 
       const existed_phoneNumber = await Citizen.findOne({ phoneNumber });
-      if (existed_phoneNumber) {
+
+      if (existed_phoneNumber && existed_phoneNumber.phoneNumber !== "") {
         return res
           .status(400)
           .json({ msg: "Đã tồn tại công dân có số điện thoại này." });

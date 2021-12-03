@@ -20,8 +20,12 @@ const CitizenSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: false,
-      unique: false,
+      trim: true,
+      index: {
+        unique: true,
+        sparse: true,
+        partialFilterExpression: { phoneNumber: { $type: "string" } },
+      },
     },
     email: {
       type: String,
