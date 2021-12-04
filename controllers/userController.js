@@ -104,8 +104,14 @@ const updateUserById = async (req, res) => {
       }
     }
 
-    if (newPassword) {
+    if (newPassword && newPassword !== null) {
       newPassword = await bcript.hash(newPassword, 10)
+    }
+    if (startTime === null) {
+      startTime = undefined
+    }
+    if (endTime === null) {
+      endTime = undefined
     }
     let dataUser = {
       password: newPassword,
