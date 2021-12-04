@@ -42,7 +42,7 @@ const getUnitById = async (req, res) => {
     if (regency === 'A1') {
       return res.status(200).json(unit)
     }
-    let regex = new RegExp(`/^${username}\d{2}/`)
+    let regex = new RegExp(`${username}`)
     if (regex.test(unit.code)) {
       res.status(200).json(unit)
     } else {
@@ -61,6 +61,10 @@ const createUnit = async (req, res) => {
     let check = await Unit.findOne({ code })
     if (check) {
       return res.status(400).json({ msg: 'Mã đơn vị đã tồn tại!' })
+    }
+    let regex = new RegExp(`${username}`)
+    if (!regex.test(code)) {
+      return res.status(400).json({ msg: 'Mã đơn vị không hợp lệ!' })
     }
     let parentUnit = await Unit.findOne({ code: username })
     let newUnit = new Unit()
@@ -97,7 +101,7 @@ const updateUnitById = async (req, res) => {
     if (!oldUnit) {
       return res.statsu(400).json({ msg: 'Đơn vị không tồn tại!' })
     }
-    let regex = new RegExp(`/^${username}\d{2}/`)
+    let regex = new RegExp(`${username}`)
     if (regex.test(oldUnit.code)) {
       let updatedUnit = await Unit.findByIdAndUpdate(idUnit, {
         nameOfUnit,
@@ -125,7 +129,9 @@ const deleteUnitById = async (req, res) => {
     if (!oldUnit) {
       return res.status(400).json({ msg: 'Invalid Unit id!' })
     }
-    let regex = new RegExp(`/^${username}\d{2}/`)
+    let regex = new RegExp(`${username}`)
+    console.log(regex)
+    console.log(regex.test(oldUnit.code))
     if (regex.test(oldUnit.code)) {
       await Unit.findByIdAndDelete(idUnit)
       res.status(200).json({ msg: 'Delete successfully' })

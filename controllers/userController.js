@@ -1,6 +1,8 @@
 const User = require('../models/User')
+const Unit = require('../models/Unit')
 const bcript = require('bcrypt')
 const { getChildRegency } = require('../functions')
+const location = require('../data/location.json')
 
 const getAllUser = async (req, res) => {
   let { regency } = req.user
@@ -142,6 +144,31 @@ const deleteUserById = async (req, res) => {
   }
 }
 
+const getOptions = async (req, res) => {
+  let { username, regency } = req.user
+  try {
+    let options = null
+    if (regency === 'A1') {
+      options = location.map(x => x.label)
+    } else if (regency === 'A2') {
+      let city = await Unit.findOne({ code: username })
+      let temp = location.filter(x => x.label === city.nameOfUnit)[0]['Districts']
+      options = temp.map(x => x.label)
+    } else if (regency === 'A3') {
+      let city = await Unit.findOne({ code: username.slice(0, 2) })
+      let district = await Unit.findOne({ code: username.slice(0, 4) })
+      let temp = location.filter(x => x.label === city.nameOfUnit)[0]['Districts']
+      temp = temp.filter(x => x.label === district.nameOfUnit)[0]['Wards']
+      options = temp.map(x => x.label)
+    }
+
+    return res.status(200).json(options)
+  } catch(err) {
+    console.log(`Get options error: ${err}`)
+    res.status(400).json({ message: 'Get options error!' })
+  }
+}
+
 module.exports = {
   getAllUser,
   getChildUser,
@@ -149,4 +176,5 @@ module.exports = {
   createUser,
   updateUserById,
   deleteUserById,
+  getOptions,
 }
