@@ -10,10 +10,6 @@ const CitizenSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    currentAddress: {
-      type: String,
-      required: false,
-    },
     gender: {
       type: String,
       required: true,
@@ -31,20 +27,44 @@ const CitizenSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    identifiedCode: {
+    currentAddress: {
       type: String,
       required: true,
+    },
+    residentAddress: {
+      type: String,
+      required: true,
+    },
+    educationLevel: {
+      type: String,
+      required: true,
+    },
+    identifiedCode: {
+      type: String,
+      required: function () {
+        const age =
+          new Date().getFullYear() - parseInt(this.dateOfBirth.slice(-4));
+
+        if (age < 15) {
+          return false;
+        }
+        return true;
+      },
       length: 12,
-      unique: true,
+      trim: true,
+      index: {
+        unique: true,
+        sparse: true,
+        partialFilterExpression: { identifiedCode: { $type: "string" } },
+      },
     },
     occupation: {
       type: String,
-      required: false,
-      default: null,
+      required: true,
     },
     ethnic: {
       type: String,
-      required: false,
+      required: true,
     },
     location: {
       city: {
@@ -66,7 +86,7 @@ const CitizenSchema = new mongoose.Schema(
     },
     religion: {
       type: String,
-      required: false,
+      required: true,
     },
   },
   {
