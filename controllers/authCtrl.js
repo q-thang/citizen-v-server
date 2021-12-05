@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const Unit = require("../models/Unit");
 
 const authCtrl = {
   register: async (req, res) => {
@@ -71,6 +72,45 @@ const authCtrl = {
         id: user._id,
       });
 
+      // find current unit
+
+      let unitOfUser;
+      let unitOfParentUser;
+      let unitOfGrandUser;
+      let unitOfGreatGrandUser;
+
+      unitOfUser = await Unit.findOne({ code: user.username });
+
+      let res_user = {
+        ...user._doc,
+        nameOfUnit: user.regency !== "A1" ? unitOfUser.nameOfUnit : "",
+        password: "",
+      };
+
+      // find parent of current unit
+      if (["A3", "B1", "B2"].includes(user.regency)) {
+        unitOfParentUser = await Unit.findById(unitOfUser.idParent);
+        res_user = {
+          ...res_user,
+          nameOfParentUnit: unitOfParentUser.nameOfUnit,
+        };
+      }
+
+      // find grand of current unit
+      if (["B1", "B2"].includes(user.regency)) {
+        unitOfGrandUser = await Unit.findById(unitOfParentUser.idParent);
+        res_user = { ...res_user, nameOfGrandUnit: unitOfGrandUser.nameOfUnit };
+      }
+
+      // find great grand of current unit
+      if (user.regency === "B2") {
+        unitOfGreatGrandUser = await Unit.findById(unitOfGrandUser.idParent);
+        res_user = {
+          ...res_user,
+          nameOfGreatGrandUnit: unitOfGreatGrandUser.nameOfUnit,
+        };
+      }
+
       res.cookie("refreshtoken", refresh_token, {
         httpOnly: true,
         path: "/api/refresh_token",
@@ -80,10 +120,7 @@ const authCtrl = {
       res.json({
         msg: "Đăng nhập thành công!",
         access_token,
-        user: {
-          ...user._doc,
-          password: "",
-        },
+        user: res_user,
       });
     } catch (err) {
       return res.status(500).json({ msg: err.message });

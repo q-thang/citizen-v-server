@@ -1,142 +1,151 @@
-const ObjectId = require('mongoose').Types.ObjectId 
-const Unit = require('../models/Unit')
+const ObjectId = require("mongoose").Types.ObjectId;
+const Unit = require("../models/Unit");
 
 const getAllUnit = async (req, res) => {
-  let { regency } = req.user
+  let { regency } = req.user;
   try {
-    if (regency === 'A1') {
-      let units = await Unit.find({})
-      res.status(200).json(units)
+    if (regency === "A1") {
+      let units = await Unit.find({});
+      res.status(200).json(units);
     } else {
-      res.status(400).json({ msg: 'Not allowed!'})
+      res.status(400).json({ msg: "Not allowed!" });
     }
-  } catch(err) {
-    console.log(`Get all unit error: ${err}`)
-    res.status(400).json({ msg: 'Get error' })
+  } catch (err) {
+    console.log(`Get all unit error: ${err}`);
+    res.status(400).json({ msg: "Get error" });
   }
-}
+};
 
 const getChildUnit = async (req, res) => {
-  let { username, regency } = req.user
+  let { username, regency } = req.user;
   try {
-    let unit = await Unit.findOne({ code: username })
-    let childUnit = null
-    if (regency === 'A1') {
-      childUnit = await Unit.find({ idParent: null })
+    let unit = await Unit.findOne({ code: username });
+    let childUnit = null;
+    if (regency === "A1") {
+      childUnit = await Unit.find({ idParent: null });
+    } else {
+      childUnit = await Unit.find({ idParent: unit._id });
     }
-    else {
-      childUnit = await Unit.find({ idParent: unit._id })
-    }
-    res.status(200).json(childUnit)
-  } catch(err) {
-    console.log(`Get child unit error: ${err}`)
-    res.status(400).json({ msg: 'Get error' })
+    res.status(200).json(childUnit);
+  } catch (err) {
+    console.log(`Get child unit error: ${err}`);
+    res.status(400).json({ msg: "Get error" });
   }
-}
+};
 
 const getUnitById = async (req, res) => {
-  let { username, regency } = req.user
-  let { idUnit } = req.params
+  let { username, regency } = req.user;
+  let { idUnit } = req.params;
   try {
-    let unit = await Unit.findById(idUnit)
-    if (regency === 'A1') {
-      return res.status(200).json(unit)
+    let unit = await Unit.findById(idUnit);
+    if (regency === "A1") {
+      return res.status(200).json(unit);
     }
-    let regex = new RegExp(`/^${username}\d{2}/`)
+    let regex = new RegExp(`/^${username}\d{2}/`);
     if (regex.test(unit.code)) {
-      res.status(200).json(unit)
+      res.status(200).json(unit);
     } else {
-      res.status(400).json({ msg: 'Not allowed!' })
+      res.status(400).json({ msg: "Not allowed!" });
     }
-  } catch(err) {
-    console.log(`Get unit error: ${err}`)
-    res.status(400).json({ msg: 'Get error' })
+  } catch (err) {
+    console.log(`Get unit error: ${err}`);
+    res.status(400).json({ msg: "Get error" });
   }
-}
+};
 
 const createUnit = async (req, res) => {
-  let { username } = req.user
-  let { nameOfUnit, code } = req.body
+  const { username } = req.user;
+  const { nameOfUnit, code } = req.body;
   try {
-    let check = await Unit.findOne({ code })
+    let check = await Unit.findOne({ code: code });
     if (check) {
-      return res.status(400).json({ msg: 'Mã đơn vị đã tồn tại!' })
+      return res.status(400).json({ msg: "Mã đơn vị đã tồn tại!" });
     }
-    let parentUnit = await Unit.findOne({ code: username })
-    let newUnit = new Unit()
-    newUnit.nameOfUnit = nameOfUnit
-    newUnit.code = code
-    if (parentUnit) { 
-      newUnit.idParent = parentUnit._id
+
+    const check_nameOfUnit = await Unit.findOne({ nameOfUnit: nameOfUnit });
+
+    if (check_nameOfUnit) {
+      return res
+        .status(400)
+        .json({ msg: "Tên hành chính của đơn vị đã tồn tại!" });
+    }
+
+    let parentUnit = await Unit.findOne({ code: username });
+    let newUnit = new Unit();
+    newUnit.nameOfUnit = nameOfUnit;
+    newUnit.code = code;
+    if (parentUnit) {
+      newUnit.idParent = parentUnit._id;
     } else {
-      newUnit.idParent = null
+      newUnit.idParent = null;
     }
 
-    await newUnit.save()
-    res.status(200).json(newUnit)
-
-  } catch(err) {
-    console.log(`Create unit error: ${err}`)
-    res.status(400).json({ msg: 'Create error' })
+    await newUnit.save();
+    res.status(200).json(newUnit);
+  } catch (err) {
+    console.log(`Create unit error: ${err}`);
+    res.status(400).json({ msg: "Create error" });
   }
-}
+};
 
 const updateUnitById = async (req, res) => {
-  let { username, regency } = req.user
-  let { idUnit } = req.params
-  let { nameOfUnit, code } = req.body
+  let { username, regency } = req.user;
+  let { idUnit } = req.params;
+  let { nameOfUnit, code } = req.body;
   try {
-    if (regency === 'A1') {
+    if (regency === "A1") {
       let updatedUnit = await Unit.findByIdAndUpdate(idUnit, {
         nameOfUnit,
-        code
-      })
-      return res.status(200).json({ msg: 'Cập nhật thành công!', data: updatedUnit })
+        code,
+      });
+      return res
+        .status(200)
+        .json({ msg: "Cập nhật thành công!", data: updatedUnit });
     }
-    let oldUnit = await Unit.findById(idUnit)
+    let oldUnit = await Unit.findById(idUnit);
     if (!oldUnit) {
-      return res.statsu(400).json({ msg: 'Đơn vị không tồn tại!' })
+      return res.statsu(400).json({ msg: "Đơn vị không tồn tại!" });
     }
-    let regex = new RegExp(`/^${username}\d{2}/`)
+    let regex = new RegExp(`/^${username}\d{2}/`);
     if (regex.test(oldUnit.code)) {
       let updatedUnit = await Unit.findByIdAndUpdate(idUnit, {
         nameOfUnit,
-        code
-      })
-      res.status(200).json({ msg: 'Cập nhật thành công!', data: updatedUnit })
+        code,
+      });
+      res.status(200).json({ msg: "Cập nhật thành công!", data: updatedUnit });
     } else {
-      res.status(400).json({ msg: 'Not allowed!' })
+      res.status(400).json({ msg: "Not allowed!" });
     }
-  } catch(err) {
-    console.log(`Update unit error: ${err}`)
-    res.status(400).json({ msg: 'Update error' })
+  } catch (err) {
+    console.log(`Update unit error: ${err}`);
+    res.status(400).json({ msg: "Update error" });
   }
-}
+};
 
 const deleteUnitById = async (req, res) => {
-  let { username, regency } = req.user
-  let { idUnit } = req.params
+  let { username, regency } = req.user;
+  let { idUnit } = req.params;
   try {
-    if (regency === 'A1') {
-      await Unit.findByIdAndDelete(idUnit)
-      return res.status(200).json({ msg: 'Delete successfully' })
+    if (regency === "A1") {
+      await Unit.findByIdAndDelete(idUnit);
+      return res.status(200).json({ msg: "Delete successfully" });
     }
-    let oldUnit = await Unit.findById(idUnit)
+    let oldUnit = await Unit.findById(idUnit);
     if (!oldUnit) {
-      return res.status(400).json({ msg: 'Invalid Unit id!' })
+      return res.status(400).json({ msg: "Invalid Unit id!" });
     }
-    let regex = new RegExp(`/^${username}\d{2}/`)
+    let regex = new RegExp(`/^${username}\d{2}/`);
     if (regex.test(oldUnit.code)) {
-      await Unit.findByIdAndDelete(idUnit)
-      res.status(200).json({ msg: 'Delete successfully' })
+      await Unit.findByIdAndDelete(idUnit);
+      res.status(200).json({ msg: "Delete successfully" });
     } else {
-      res.status(400).json({ msg: 'Not allowed!' })
+      res.status(400).json({ msg: "Not allowed!" });
     }
-  } catch(err) {
-    console.log(`Delete unit error: ${err}`)
-    res.status(400).json({ msg: 'Delete error' })
+  } catch (err) {
+    console.log(`Delete unit error: ${err}`);
+    res.status(400).json({ msg: "Delete error" });
   }
-}
+};
 
 module.exports = {
   getAllUnit,
@@ -144,5 +153,5 @@ module.exports = {
   getUnitById,
   createUnit,
   updateUnitById,
-  deleteUnitById
-}
+  deleteUnitById,
+};

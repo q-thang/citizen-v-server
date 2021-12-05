@@ -51,8 +51,6 @@ const citizenCtrl = {
       location,
     } = req.body;
 
-    console.log(req.body);
-
     let criteria = {};
 
     if (location) {
