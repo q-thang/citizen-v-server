@@ -1,10 +1,7 @@
 const User = require("../models/User");
 const bcript = require("bcrypt");
 const { getChildRegency } = require("../functions");
-const User = require("../models/User");
 const Unit = require("../models/Unit");
-const bcript = require("bcrypt");
-const { getChildRegency } = require("../functions");
 const location = require("../data/location.json");
 
 const getAllUser = async (req, res) => {
