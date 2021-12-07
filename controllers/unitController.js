@@ -1,5 +1,6 @@
 const ObjectId = require("mongoose").Types.ObjectId;
 const Unit = require("../models/Unit");
+const User = require("../models/User")
 
 const getAllUnit = async (req, res) => {
   let { regency } = req.user;
@@ -41,7 +42,7 @@ const getUnitById = async (req, res) => {
     if (regency === "A1") {
       return res.status(200).json(unit);
     }
-    let regex = new RegExp(`/^${username}\d{2}/`);
+    let regex = new RegExp(`^${username}\\d{2}$`);
     if (regex.test(unit.code)) {
       res.status(200).json(unit);
     } else {
@@ -54,7 +55,7 @@ const getUnitById = async (req, res) => {
 };
 
 const createUnit = async (req, res) => {
-  const { username } = req.user;
+  const { username, regency } = req.user;
   const { nameOfUnit, code } = req.body;
   try {
     let check = await Unit.findOne({ code: code });
@@ -69,7 +70,13 @@ const createUnit = async (req, res) => {
         .status(400)
         .json({ msg: "Tên hành chính của đơn vị đã tồn tại!" });
     }
-
+    if (regency === 'A1') {
+      username = ''
+    }
+    let regex = new RegExp(`^${username}\\d{2}$`)
+    if (!regex.test(code)) {
+      return res.status(400).json({ msg: 'Mã đơn vị không hợp lệ!' })
+    }
     let parentUnit = await Unit.findOne({ code: username });
     let newUnit = new Unit();
     newUnit.nameOfUnit = nameOfUnit;
@@ -93,25 +100,29 @@ const updateUnitById = async (req, res) => {
   let { idUnit } = req.params;
   let { nameOfUnit, code } = req.body;
   try {
+    let oldUnit = await Unit.findById(idUnit);
+    if (!oldUnit) {
+      return res.statsu(400).json({ msg: "Đơn vị không tồn tại!" });
+    }
     if (regency === "A1") {
       let updatedUnit = await Unit.findByIdAndUpdate(idUnit, {
         nameOfUnit,
         code,
       });
+      await User.findOneAndUpdate({ username: oldUnit.code }, { username: code })
       return res
         .status(200)
         .json({ msg: "Cập nhật thành công!", data: updatedUnit });
     }
-    let oldUnit = await Unit.findById(idUnit);
-    if (!oldUnit) {
-      return res.statsu(400).json({ msg: "Đơn vị không tồn tại!" });
-    }
-    let regex = new RegExp(`/^${username}\d{2}/`);
+    
+    let regex = new RegExp(`^${username}\\d{2}$`);
     if (regex.test(oldUnit.code)) {
       let updatedUnit = await Unit.findByIdAndUpdate(idUnit, {
         nameOfUnit,
         code,
       });
+      let user = await User.findOne({ username: oldUnit.code })
+      await User.findOneAndUpdate({ username: oldUnit.code }, { username: code })
       res.status(200).json({ msg: "Cập nhật thành công!", data: updatedUnit });
     } else {
       res.status(400).json({ msg: "Not allowed!" });
@@ -134,7 +145,7 @@ const deleteUnitById = async (req, res) => {
     if (!oldUnit) {
       return res.status(400).json({ msg: "Invalid Unit id!" });
     }
-    let regex = new RegExp(`/^${username}\d{2}/`);
+    let regex = new RegExp(`^${username}\\d{2}$`);
     if (regex.test(oldUnit.code)) {
       await Unit.findByIdAndDelete(idUnit);
       res.status(200).json({ msg: "Delete successfully" });

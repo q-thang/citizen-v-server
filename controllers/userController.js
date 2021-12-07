@@ -45,7 +45,7 @@ const getUserById = async (req, res) => {
     if (regency === "A1") {
       return res.status(200).json(user);
     }
-    let regex = new RegExp(`/^${username}\d{2}/`);
+    let regex = new RegExp(`^${username}\\d{2}$`);
     let child_regency = getChildRegency(regency);
     if (regex.test(user.username) && user.regency === child_regency) {
       res.status(200).json(user);
@@ -103,7 +103,7 @@ const updateUserById = async (req, res) => {
   try {
     let user = await User.findById(idUser);
     if (regency !== "A1") {
-      let regex = new RegExp(`/^${username}\d{2}/`);
+      let regex = new RegExp(`^${username}\\d{2}$`);
       if (!regex.test(user.username)) {
         return res.status(400).json({ msg: "Not allowed!" });
       }
@@ -111,6 +111,8 @@ const updateUserById = async (req, res) => {
 
     if (newPassword && newPassword !== null) {
       newPassword = await bcript.hash(newPassword, 10);
+    } else {
+      newPassword = undefined
     }
     if (startTime === null) {
       startTime = undefined;
@@ -142,7 +144,7 @@ const deleteUserById = async (req, res) => {
   try {
     let user = await User.findById(idUser);
     if (regency !== "A1") {
-      let regex = new RegExp(`/^${username}\d{2}/`);
+      let regex = new RegExp(`^${username}\\d{2}$`);
       if (!regex.test(user.username)) {
         return res.status(400).json({ msg: "Not allowed!" });
       }
