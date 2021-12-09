@@ -211,6 +211,7 @@ const citizenCtrl = {
   },
 
   createCitizen: async (req, res) => {
+    let { active } = req.user;
     const {
       fullName,
       dateOfBirth,
@@ -227,6 +228,9 @@ const citizenCtrl = {
       location,
     } = req.body;
     try {
+      if (!active) {
+        return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+      }
       const newCitizen = new Citizen({
         fullName,
         dateOfBirth,
@@ -272,6 +276,7 @@ const citizenCtrl = {
   },
 
   updateCitizenById: async (req, res) => {
+    let { active } = req.user
     const {
       fullName,
       dateOfBirth,
@@ -288,6 +293,9 @@ const citizenCtrl = {
     } = req.body;
 
     try {
+      if (!active) {
+        return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+      }
       const current_citizen = await Citizen.findById(req.params.idCitizen);
 
       if (identifiedCode !== current_citizen.identifiedCode) {
@@ -336,7 +344,11 @@ const citizenCtrl = {
   },
 
   deleteCitizenById: async (req, res) => {
+    let { active } = req.user
     try {
+      if (!active) {
+        return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+      }
       await Citizen.findByIdAndDelete(req.params.idCitizen);
       res.status(200).json({ msg: "Đã xoá thành công công dân này!" });
     } catch (err) {

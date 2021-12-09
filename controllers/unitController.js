@@ -77,9 +77,12 @@ const getVillageByWard = async (req, res) => {
 };
 
 const createUnit = async (req, res) => {
-  const { username, regency } = req.user;
+  const { username, regency, active } = req.user;
   const { nameOfUnit, code } = req.body;
   try {
+    if (!active) {
+      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+    }
     let check = await Unit.findOne({ code: code });
     if (check) {
       return res.status(400).json({ msg: "Mã đơn vị đã tồn tại!" });
@@ -118,10 +121,13 @@ const createUnit = async (req, res) => {
 };
 
 const updateUnitById = async (req, res) => {
-  let { username, regency } = req.user;
+  let { username, regency, active } = req.user;
   let { idUnit } = req.params;
   let { nameOfUnit, code } = req.body;
   try {
+    if (!active) {
+      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+    }
     let oldUnit = await Unit.findById(idUnit);
     if (!oldUnit) {
       return res.statsu(400).json({ msg: "Đơn vị không tồn tại!" });
@@ -162,9 +168,12 @@ const updateUnitById = async (req, res) => {
 };
 
 const deleteUnitById = async (req, res) => {
-  let { username, regency } = req.user;
+  let { username, regency, active } = req.user;
   let { idUnit } = req.params;
   try {
+    if (!active) {
+      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+    }
     if (regency === "A1") {
       await Unit.findByIdAndDelete(idUnit);
       return res.status(200).json({ msg: "Delete successfully" });
