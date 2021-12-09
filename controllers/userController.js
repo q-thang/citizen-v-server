@@ -99,11 +99,11 @@ const createUser = async (req, res) => {
 };
 
 const updateUserById = async (req, res) => {
-  let { username, regency, active } = req.user;
+  let { username, regency, pActive } = req.user;
   let { idUser } = req.params;
   let { newPassword, active, startTime, endTime } = req.body;
   try {
-    if (!active) {
+    if (!pActive) {
       return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
     }
     let user = await User.findById(idUser);

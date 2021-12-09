@@ -24,11 +24,15 @@ const authCtrl = {
       }
 
       //  Set active
-      let { startTime, endTime } = user
-      if (new Date(startTime) <= new Date() && new Date(endTime) >= new Date()) {
+      let { regency, startTime, endTime } = user
+      if (regency === 'A1') {
         await User.findByIdAndUpdate(user._id, { active: true })
       } else {
-        await User.findByIdAndUpdate(user._id, { active: false })
+        if (new Date(startTime) <= new Date() && new Date(endTime) >= new Date()) {
+          await User.findByIdAndUpdate(user._id, { active: true })
+        } else {
+          await User.findByIdAndUpdate(user._id, { active: false })
+        }
       }
 
       const access_token = createAccessToken({
