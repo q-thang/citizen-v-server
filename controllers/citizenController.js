@@ -101,6 +101,22 @@ const citizenCtrl = {
         }
       }
 
+      if (village) {
+        if (village.includes(",")) {
+          const villageList = village.split(",");
+
+          criteria = {
+            ...criteria,
+            "location.village": { $in: villageList },
+          };
+        } else {
+          criteria = {
+            ...criteria,
+            "location.village": village,
+          };
+        }
+      }
+
       const citizensFound = await Citizen.find(criteria);
 
       res.json(citizensFound);

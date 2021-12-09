@@ -17,11 +17,6 @@ const CitizenSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       trim: true,
-      index: {
-        unique: true,
-        sparse: true,
-        partialFilterExpression: { phoneNumber: { $type: "string" } },
-      },
     },
     email: {
       type: String,
@@ -52,11 +47,6 @@ const CitizenSchema = new mongoose.Schema(
       },
       length: 12,
       trim: true,
-      index: {
-        unique: true,
-        sparse: true,
-        partialFilterExpression: { identifiedCode: { $type: "string" } },
-      },
     },
     occupation: {
       type: String,
@@ -98,6 +88,7 @@ CitizenSchema.index({
   "location.city": 1,
   "location.district": 1,
   "location.ward": 1,
+  "location.village": 1,
 });
 
 module.exports = mongoose.model("Citizen", CitizenSchema);
