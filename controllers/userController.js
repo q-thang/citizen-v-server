@@ -65,7 +65,7 @@ const createUser = async (req, res) => {
   let { username, password } = req.body;
   try {
     if (!active) {
-      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+      return res.status(400).json({ msg: "Không trong thời gian khai báo!" });
     }
     let newRegency = getChildRegency(regency);
 
@@ -105,7 +105,7 @@ const updateUserById = async (req, res) => {
   let { newPassword, active, startTime, endTime } = req.body;
   try {
     if (!pActive) {
-      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+      return res.status(400).json({ msg: "Không trong thời gian khai báo!" });
     }
     let user = await User.findById(idUser);
     if (regency !== "A1") {
@@ -149,7 +149,7 @@ const deleteUserById = async (req, res) => {
   let { idUser } = req.params;
   try {
     if (!active) {
-      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+      return res.status(400).json({ msg: "Không trong thời gian khai báo!" });
     }
     let user = await User.findById(idUser);
     if (regency !== "A1") {
@@ -228,6 +228,58 @@ const monitorUnits = async (req, res) => {
   }
 };
 
+const perDateMonitor = async (req, res) => {
+  try {
+    const typeCurrent = req.user.regency;
+
+    const queryUnit = req.query.unit;
+    let typeUnit = "";
+
+    if (typeCurrent === "A1") {
+      typeUnit = "location.city";
+    } else if (typeCurrent === "A2") {
+      typeUnit = "location.district";
+    } else if (typeCurrent === "A3") {
+      typeUnit = "location.ward";
+    } else if (typeCurrent === "B1") {
+      typeUnit = "location.village";
+    }
+
+    const perDateCitizens = await Citizen.aggregate([
+      { $match: { [typeUnit]: queryUnit } },
+      {
+        $project: {
+          dateGroup: {
+            $dateToString: { format: "%d/%m/%Y", date: "$createdAt" },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { createdAt: "$dateGroup" },
+          numberOfCitizens: { $sum: 1 },
+        },
+      },
+
+      {
+        $addFields: {
+          createdAt: "$_id.createdAt",
+        },
+      },
+      {
+        $project: {
+          _id: false,
+        },
+      },
+    ]);
+
+    res.json(perDateCitizens);
+  } catch (err) {
+    console.log(`Delete user error: ${err}`);
+    res.status(400).json({ message: "Invalid!" });
+  }
+};
+
 module.exports = {
   getAllUser,
   getChildUser,
@@ -237,4 +289,5 @@ module.exports = {
   deleteUserById,
   getOptions,
   monitorUnits,
+  perDateMonitor,
 };
