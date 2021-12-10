@@ -1,11 +1,6 @@
 const router = require("express").Router();
 const authCtrl = require("../controllers/authCtrl");
 
-// @route POST /api/register
-// @desc Register (Create an account for an Official)
-// @access Private
-router.post("/register", authCtrl.register);
-
 // @route POST /api/login
 // @desc Login to the Official Account
 // @access Public
