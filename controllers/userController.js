@@ -3,6 +3,7 @@ const bcript = require("bcrypt");
 const { getChildRegency } = require("../functions");
 const Unit = require("../models/Unit");
 const location = require("../data/location.json");
+const Citizen = require("../models/Citizen");
 
 const getAllUser = async (req, res) => {
   let { regency } = req.user;
@@ -112,7 +113,7 @@ const updateUserById = async (req, res) => {
     if (newPassword && newPassword !== null) {
       newPassword = await bcript.hash(newPassword, 10);
     } else {
-      newPassword = undefined
+      newPassword = undefined;
     }
     if (startTime === null) {
       startTime = undefined;
@@ -186,6 +187,39 @@ const getOptions = async (req, res) => {
   }
 };
 
+const monitorUnits = async (req, res) => {
+  try {
+    const typeCurrent = req.user.regency;
+
+    const queryUnit = req.query.unit;
+    let typeUnit = "";
+
+    if (typeCurrent === "A1") {
+      typeUnit = "location.city";
+    } else if (typeCurrent === "A2") {
+      typeUnit = "location.district";
+    } else if (typeCurrent === "A3") {
+      typeUnit = "location.ward";
+    } else if (typeCurrent === "B1") {
+      typeUnit = "location.village";
+    }
+
+    const countCitizens = await Citizen.aggregate([
+      { $match: { [typeUnit]: queryUnit } },
+      { $count: "count_citizens" },
+    ]);
+
+    if (countCitizens.length !== 0) {
+      res.json(countCitizens[0].count_citizens);
+    } else {
+      res.json(0);
+    }
+  } catch (err) {
+    console.log(`Delete user error: ${err}`);
+    res.status(400).json({ message: "Invalid!" });
+  }
+};
+
 module.exports = {
   getAllUser,
   getChildUser,
@@ -194,4 +228,5 @@ module.exports = {
   updateUserById,
   deleteUserById,
   getOptions,
+  monitorUnits,
 };
