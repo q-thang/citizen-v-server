@@ -4,48 +4,6 @@ const jwt = require("jsonwebtoken");
 const Unit = require("../models/Unit");
 
 const authCtrl = {
-  register: async (req, res) => {
-    try {
-      const { username, password, regency, active } = req.body;
-
-      const passwordHash = await bcrypt.hash(password, 12);
-
-      const newUser = new User({
-        username,
-        password: passwordHash,
-        regency,
-        active,
-      });
-
-      const access_token = createAccessToken({
-        id: newUser._id,
-      });
-
-      const refresh_token = createRefreshToken({
-        id: newUser._id,
-      });
-
-      res.cookie("refreshtoken", refresh_token, {
-        httpOnly: true,
-        path: "/api/refresh_token",
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      });
-
-      await newUser.save();
-
-      res.json({
-        msg: "Đăng ký thành công!",
-        access_token,
-        user: {
-          ...newUser._doc,
-          password: "",
-        },
-      });
-    } catch (err) {
-      return res.status(500).json({ msg: err.message });
-    }
-  },
-
   login: async (req, res) => {
     try {
       const { username, password } = req.body;
@@ -63,6 +21,18 @@ const authCtrl = {
         return res.status(400).json({
           msg: "Sai mật khẩu. Vui lòng thử lại hoặc cài đặt lại mật khẩu.",
         });
+      }
+
+      //  Set active
+      let { regency, startTime, endTime } = user
+      if (regency === 'A1') {
+        await User.findByIdAndUpdate(user._id, { active: true })
+      } else {
+        if (new Date(startTime) <= new Date() && new Date(endTime) >= new Date()) {
+          await User.findByIdAndUpdate(user._id, { active: true })
+        } else {
+          await User.findByIdAndUpdate(user._id, { active: false })
+        }
       }
 
       const access_token = createAccessToken({

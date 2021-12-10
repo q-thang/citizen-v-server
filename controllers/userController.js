@@ -60,11 +60,13 @@ const getUserById = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  let { regency } = req.user;
+  let { regency, active } = req.user;
   let parent_username = req.user.username;
-
   let { username, password } = req.body;
   try {
+    if (!active) {
+      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+    }
     let newRegency = getChildRegency(regency);
 
     if (username && password) {
@@ -98,10 +100,13 @@ const createUser = async (req, res) => {
 };
 
 const updateUserById = async (req, res) => {
-  let { username, regency } = req.user;
+  let { username, regency, pActive } = req.user;
   let { idUser } = req.params;
   let { newPassword, active, startTime, endTime } = req.body;
   try {
+    if (!pActive) {
+      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+    }
     let user = await User.findById(idUser);
     if (regency !== "A1") {
       let regex = new RegExp(`^${username}\\d{2}$`);
@@ -140,9 +145,12 @@ const updateUserById = async (req, res) => {
 };
 
 const deleteUserById = async (req, res) => {
-  let { username, regency } = req.user;
+  let { username, regency, active } = req.user;
   let { idUser } = req.params;
   try {
+    if (!active) {
+      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+    }
     let user = await User.findById(idUser);
     if (regency !== "A1") {
       let regex = new RegExp(`^${username}\\d{2}$`);
