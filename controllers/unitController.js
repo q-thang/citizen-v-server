@@ -77,7 +77,7 @@ const getVillageByWard = async (req, res) => {
 };
 
 const createUnit = async (req, res) => {
-  const { username, regency } = req.user;
+  let { username, regency } = req.user;
   const { nameOfUnit, code } = req.body;
   try {
     let check = await Unit.findOne({ code: code });
@@ -92,17 +92,22 @@ const createUnit = async (req, res) => {
         .status(400)
         .json({ msg: "Tên hành chính của đơn vị đã tồn tại!" });
     }
+
     if (regency === "A1") {
       username = "";
     }
+
     let regex = new RegExp(`^${username}\\d{2}$`);
+
     if (!regex.test(code)) {
       return res.status(400).json({ msg: "Mã đơn vị không hợp lệ!" });
     }
+
     let parentUnit = await Unit.findOne({ code: username });
     let newUnit = new Unit();
     newUnit.nameOfUnit = nameOfUnit;
     newUnit.code = code;
+
     if (parentUnit) {
       newUnit.idParent = parentUnit._id;
     } else {
@@ -111,6 +116,7 @@ const createUnit = async (req, res) => {
 
     await newUnit.save();
     res.status(200).json(newUnit);
+
   } catch (err) {
     console.log(`Create unit error: ${err}`);
     res.status(400).json({ msg: "Create error" });
