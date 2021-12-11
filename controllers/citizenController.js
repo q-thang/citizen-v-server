@@ -212,6 +212,7 @@ const citizenCtrl = {
 
   createCitizen: async (req, res) => {
     let { active } = req.user;
+
     const {
       fullName,
       dateOfBirth,
@@ -227,10 +228,15 @@ const citizenCtrl = {
       religion,
       location,
     } = req.body;
+
     try {
       if (!active) {
-        return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+        return res.status(200).json({
+          success: false, 
+          msg: 'Không trong thời gian khai báo!' 
+        });
       }
+
       const newCitizen = new Citizen({
         fullName,
         dateOfBirth,
@@ -248,25 +254,34 @@ const citizenCtrl = {
       });
 
       const existed_idCode = await Citizen.findOne({ identifiedCode });
+
       if (existed_idCode && existed_idCode.identifiedCode !== "") {
-        return res
-          .status(400)
-          .json({ msg: "Đã tồn tại công dân có CCCD này." });
+        return res.status(200).json({
+          success: false, 
+          msg: "Đã tồn tại công dân có CCCD này." 
+        });
       }
 
       const existed_phoneNumber = await Citizen.findOne({ phoneNumber });
 
       if (existed_phoneNumber && existed_phoneNumber.phoneNumber !== "") {
         return res
-          .status(400)
-          .json({ msg: "Đã tồn tại công dân có số điện thoại này." });
+          .status(200)
+          .json({
+            sucess: false, 
+            msg: "Đã tồn tại công dân có số điện thoại này." 
+          });
       }
 
       await newCitizen.save();
       res.status(200).json({
+        success: true,
         msg: "Đã khai báo thành công công dân này!",
         newCitizen: newCitizen,
       });
+
+      console.log(res);
+
     } catch (err) {
       console.log(`Create citizen error: ${err}`);
       res.status(400).json({

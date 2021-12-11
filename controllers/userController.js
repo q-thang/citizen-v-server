@@ -200,6 +200,7 @@ const monitorUnits = async (req, res) => {
     const typeCurrent = req.user.regency;
 
     const queryUnit = req.query.unit;
+    
     let typeUnit = "";
 
     if (typeCurrent === "A1") {
@@ -222,11 +223,59 @@ const monitorUnits = async (req, res) => {
     } else {
       res.json(0);
     }
+
   } catch (err) {
     console.log(`Delete user error: ${err}`);
     res.status(400).json({ message: "Invalid!" });
   }
 };
+
+const totalCitizens = async (req, res) => {
+  try {
+    const typeCurrent = req.user.regency;
+    const queryUnit = req.query.unit;
+
+    let typeUnit = '';
+
+    switch (typeCurrent) {
+      case 'A1':
+        const total = await Citizen.count({});
+        res.json(total);
+        return;
+
+      case 'A2':
+        typeUnit = 'location.city';
+        break;
+
+      case 'A3':
+        typeUnit = 'location.district';
+        break;
+
+      case 'B1':
+        typeUnit = 'location.ward';
+
+      // case B2 here
+
+      default:
+        break;
+    }
+
+    const totalCitizens = await Citizen.aggregate([
+      { $match: { [typeUnit]: queryUnit } },
+      { $count: "count_citizens" },
+    ]);
+
+    if (totalCitizens.length !== 0) {
+      res.json(totalCitizens[0].count_citizens);
+    } else {
+      res.json(0);
+    }
+
+  } catch (err) {
+    console.log(`Delete user error: ${err}`);
+    res.status(400).json({ message: "Invalid!" });
+  }
+}
 
 const perDateMonitor = async (req, res) => {
   try {
@@ -289,5 +338,6 @@ module.exports = {
   deleteUserById,
   getOptions,
   monitorUnits,
+  totalCitizens,
   perDateMonitor,
 };

@@ -7,6 +7,8 @@ router.get("/user/child", userCtrl.getChildUser);
 
 router.get("/user/monitor", userCtrl.monitorUnits);
 
+router.get('/user/totalCitizens', userCtrl.totalCitizens);
+
 router.get("/user/chartMonitor", userCtrl.perDateMonitor);
 
 router.get("/user/:idUser", userCtrl.getUserById);
