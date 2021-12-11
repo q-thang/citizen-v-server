@@ -100,7 +100,8 @@ const createUser = async (req, res) => {
 };
 
 const updateUserById = async (req, res) => {
-  let { username, regency, pActive } = req.user;
+  let { username, regency } = req.user;
+  let pActive = req.user.active
   let { idUser } = req.params;
   let { newPassword, active, startTime, endTime } = req.body;
   try {

@@ -155,7 +155,7 @@ const updateUnitById = async (req, res) => {
 
     //  Kiểm tra Unit cần sửa có phải là Unit con của User hiện tại 
     let regex = new RegExp(`^${username}\\d{2}$`);
-    if (regex.test(oldUnit.code)) {
+    if (regex.test(oldUnit.code) && regex.test(code)) {
       let updatedUnit = await Unit.findByIdAndUpdate(idUnit, {
         nameOfUnit
       });
@@ -169,7 +169,7 @@ const updateUnitById = async (req, res) => {
     }
   } catch (err) {
     console.log(`Update unit error: ${err}`);
-    res.status(400).json({ msg: "Update error" });
+    res.status(400).json({ msg: "Cập nhật đơn vị thất bại!" });
   }
 };
 
@@ -203,29 +203,21 @@ const deleteUnitById = async (req, res) => {
 };
 
 const updateUnitCode = async (p_code, new_code) => {
-  try {
-    let units = await Unit.find({ code: { $regex: p_code + '.*' } })
-    await Promise.all(units.map(async (u) => {
-      let cCode = new_code + u.code.slice(p_code.length)
-      await Unit.findByIdAndUpdate(u._id, { code: cCode })
-      await User.findOneAndUpdate({ username: u.code }, { username: cCode })
-    }))
-  } catch(err) {
-    console.log('Update unit code error: ', err)
-  }
+  let units = await Unit.find({ code: { $regex: p_code + '.*' } })
+  await Promise.all(units.map(async (u) => {
+    let cCode = new_code + u.code.slice(p_code.length)
+    await Unit.findByIdAndUpdate(u._id, { code: cCode })
+    await User.findOneAndUpdate({ username: u.code }, { username: cCode })
+  }))
 }
 
 const deleteUnitAndUser = async (idUnit) => {
-  try {
-    let p_unit = await Unit.findById(idUnit)
-    let units = await Unit.find({ code: { $regex: p_unit.code + '.*' } })
-    let idUnits = units.map(u => u._id)
-    let usernames = units.map(u => u.code)
-    await Unit.deleteMany({_id: { $in: idUnits }})
-    await User.deleteMany({ username: { $in: usernames } })
-  } catch(err) {
-    console.log(`Delete unit error: ${err}`)
-  }
+  let p_unit = await Unit.findById(idUnit)
+  let units = await Unit.find({ code: { $regex: p_unit.code + '.*' } })
+  let idUnits = units.map(u => u._id)
+  let usernames = units.map(u => u.code)
+  await Unit.deleteMany({_id: { $in: idUnits }})
+  await User.deleteMany({ username: { $in: usernames } })
 }
 
 module.exports = {
