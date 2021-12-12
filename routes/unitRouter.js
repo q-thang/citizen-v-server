@@ -11,6 +11,8 @@ router.post("/unit/getVillage", unitCtrl.getVillageByWard);
 
 router.post("/unit/", unitCtrl.createUnit);
 
+router.put("/unit/status/:idUnit", unitCtrl.updateStatus);
+
 router.put("/unit/:idUnit", unitCtrl.updateUnitById);
 
 router.delete("/unit/:idUnit", unitCtrl.deleteUnitById);

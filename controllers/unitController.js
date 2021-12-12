@@ -126,6 +126,23 @@ const createUnit = async (req, res) => {
   }
 };
 
+const updateStatus = async (req, res) => {
+  let { username } = req.user
+  let { idUnit } = req.params
+  let { status } = req.body
+  try {
+    let unit = await Unit.findById(idUnit)
+    if (unit.code !== username) {
+      return res.status(400).json({ msg: 'Not allowed!' })
+    }
+    await Unit.findByIdAndUpdate(idUnit, { status })
+    res.status(200).json({ msg: 'Báo cáo thành công!' })
+  } catch(err) {
+    console.log(err)
+    res.status(400).json({ msg: 'Báo cáo hoàn thành lỗi!' })
+  }
+}
+
 const updateUnitById = async (req, res) => {
   let { username, regency, active } = req.user;
   let { idUnit } = req.params;
@@ -226,6 +243,7 @@ module.exports = {
   getUnitById,
   createUnit,
   getVillageByWard,
+  updateStatus,
   updateUnitById,
   deleteUnitById,
 };

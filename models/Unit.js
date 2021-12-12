@@ -15,6 +15,10 @@ const UnitSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "Unit",
     },
+    status: {
+      type: Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,
