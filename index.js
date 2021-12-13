@@ -3,7 +3,8 @@ const app = express();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const db = require("./config/db");
-const auth = require('./middleware/auth')
+const auth = require("./middleware/auth");
+const SocketServer = require("./socketServer");
 require("dotenv").config();
 
 db.connect();
@@ -11,14 +12,11 @@ db.connect();
 // MIDDLEWARE
 // middleware nay dung de lay duoc du lieu nhap tu req.body
 
-
 // json() dung de parse req object thanh json object
 app.use(express.json());
 
-
 // urlencoded() dung de parse req object co the thanh nested object neu extended == true
 app.use(express.urlencoded({ extended: false }));
-
 
 app.use(cors());
 // middleware duoi day co the su dung thay cho middleware built-in cors
@@ -28,10 +26,16 @@ app.use(cors());
 //     next();
 // });
 
-
 // cookie-parser la 1 middleware dung de phan tich cu phap cookie
 app.use(cookieParser());
 
+// SOCKET
+const http = require("http").createServer(app);
+const io = require("socket.io")(http);
+
+io.on("connection", (socket) => {
+  SocketServer(socket);
+});
 
 // ROUTES
 app.use("/api", require("./routes/authRouter"));
@@ -40,8 +44,7 @@ app.use("/api", require("./routes/unitRouter"));
 app.use("/api", require("./routes/userRouter"));
 app.use("/api", require("./routes/citizenRouter"));
 
-
 const port = process.env.PORT || 5000;
-app.listen(port, () => {
+http.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
