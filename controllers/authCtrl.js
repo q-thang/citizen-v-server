@@ -28,7 +28,8 @@ const authCtrl = {
       if (regency === 'A1') {
         await User.findByIdAndUpdate(user._id, { active: true })
       } else {
-        if (new Date(startTime) <= new Date() && new Date(endTime) >= new Date()) {
+        let now = (new Date()).getTime()
+        if (parseInt(startTime) <= now && parseInt(endTime) >= now) {
           await User.findByIdAndUpdate(user._id, { active: true })
         } else {
           await User.findByIdAndUpdate(user._id, { active: false })

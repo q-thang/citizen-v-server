@@ -43,7 +43,27 @@ const getUnitById = async (req, res) => {
       return res.status(200).json(unit);
     }
     let regex = new RegExp(`^${username}\\d{2}$`);
-    if (regex.test(unit.code)) {
+    if (username === unit.code || regex.test(unit.code)) {
+      res.status(200).json(unit);
+    } else {
+      res.status(400).json({ msg: "Not allowed!" });
+    }
+  } catch (err) {
+    console.log(`Get unit error: ${err}`);
+    res.status(400).json({ msg: "Get error" });
+  }
+};
+
+const getUnitByCode = async (req, res) => {
+  let { username, regency } = req.user;
+  let { code } = req.params;
+  try {
+    let unit = await Unit.findOne({ code })
+    if (regency === "A1") {
+      return res.status(200).json(unit);
+    }
+    let regex = new RegExp(`^${username}\\d{2}$`);
+    if (username === unit.code || regex.test(unit.code)) {
       res.status(200).json(unit);
     } else {
       res.status(400).json({ msg: "Not allowed!" });
@@ -127,19 +147,22 @@ const createUnit = async (req, res) => {
 };
 
 const updateStatus = async (req, res) => {
-  let { username } = req.user
+  let { username, regency } = req.user
   let { idUnit } = req.params
   let { status } = req.body
   try {
+    if (regency !== 'B1') {
+      return res.status(400).json({ msg: 'Not allowed!' })
+    }
     let unit = await Unit.findById(idUnit)
     if (unit.code !== username) {
       return res.status(400).json({ msg: 'Not allowed!' })
     }
     await Unit.findByIdAndUpdate(idUnit, { status })
-    res.status(200).json({ msg: 'Báo cáo thành công!' })
+    res.status(200).json({ msg: 'Cập nhật thành công!' })
   } catch(err) {
     console.log(err)
-    res.status(400).json({ msg: 'Báo cáo hoàn thành lỗi!' })
+    res.status(400).json({ msg: 'Cập nhật hoàn thành lỗi!' })
   }
 }
 
@@ -241,6 +264,7 @@ module.exports = {
   getAllUnit,
   getChildUnit,
   getUnitById,
+  getUnitByCode,
   createUnit,
   getVillageByWard,
   updateStatus,

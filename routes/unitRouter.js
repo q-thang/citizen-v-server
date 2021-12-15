@@ -5,6 +5,8 @@ router.get("/unit/", unitCtrl.getAllUnit);
 
 router.get("/unit/child", unitCtrl.getChildUnit);
 
+router.get("/unit/code/:code", unitCtrl.getUnitByCode);
+
 router.get("/unit/:idUnit", unitCtrl.getUnitById);
 
 router.post("/unit/getVillage", unitCtrl.getVillageByWard);
