@@ -21,10 +21,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
     },
     startTime: {
-      type: Date
+      type: String
     },
     endTime: {
-      type: Date
+      type: String
     },
   },
   {

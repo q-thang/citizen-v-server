@@ -86,7 +86,7 @@ const createUser = async (req, res) => {
       newUser.username = username;
       newUser.password = password;
       newUser.regency = newRegency;
-      newUser.active = true;
+      newUser.active = false;
       await newUser.save();
       res.status(200).json({
         ...newUser._doc,
@@ -101,6 +101,8 @@ const createUser = async (req, res) => {
 
 const updateUserById = async (req, res) => {
   let { username, regency } = req.user;
+  let pStartTime = req.user.startTime;
+  let pEndTime = req.user.endTime;
   let pActive = req.user.active;
   let { idUser } = req.params;
   let { newPassword, active, startTime, endTime } = req.body;
@@ -115,7 +117,6 @@ const updateUserById = async (req, res) => {
         return res.status(400).json({ msg: "Not allowed!" });
       }
     }
-
     if (newPassword && newPassword !== null) {
       newPassword = await bcript.hash(newPassword, 10);
     } else {
@@ -123,9 +124,24 @@ const updateUserById = async (req, res) => {
     }
     if (startTime === null) {
       startTime = undefined;
+    } else {
+      startTime = new Date(startTime).getTime().toString();
     }
     if (endTime === null) {
       endTime = undefined;
+    } else {
+      endTime = new Date(endTime).getTime().toString();
+    }
+
+    if (parseInt(startTime) < parseInt(pStartTime)) {
+      return res
+        .status(400)
+        .json({ msg: "Thời gian bắt đầu khai báo không hợp lệ!" });
+    }
+    if (parseInt(endTime) > parseInt(pEndTime)) {
+      return res
+        .status(400)
+        .json({ msg: "Thời gian kết thúc khai báo không hợp lệ!" });
     }
     let dataUser = {
       password: newPassword,
