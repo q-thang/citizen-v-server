@@ -28,6 +28,8 @@ router.get("/citizen/:idCitizen", citizenCtrl.getCitizenById);
 // access Private
 router.post("/citizen", citizenCtrl.createCitizen);
 
+router.post("/citizen/statistic/age", citizenCtrl.statisticAge);
+
 // @route PATCH /api/citizen/:idCitizen
 // @desc Update the info of a citizen by ID code
 // access Private

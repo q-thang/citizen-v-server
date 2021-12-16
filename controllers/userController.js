@@ -101,7 +101,7 @@ const createUser = async (req, res) => {
 
 const updateUserById = async (req, res) => {
   let { username, regency } = req.user;
-  let pActive = req.user.active
+  let pActive = req.user.active;
   let { idUser } = req.params;
   let { newPassword, active, startTime, endTime } = req.body;
   try {
@@ -201,7 +201,7 @@ const monitorUnits = async (req, res) => {
     const typeCurrent = req.user.regency;
 
     const queryUnit = req.query.unit;
-    
+
     let typeUnit = "";
 
     if (typeCurrent === "A1") {
@@ -224,7 +224,6 @@ const monitorUnits = async (req, res) => {
     } else {
       res.json(0);
     }
-
   } catch (err) {
     console.log(`Delete user error: ${err}`);
     res.status(400).json({ message: "Invalid!" });
@@ -236,24 +235,24 @@ const totalCitizens = async (req, res) => {
     const typeCurrent = req.user.regency;
     const queryUnit = req.query.unit;
 
-    let typeUnit = '';
+    let typeUnit = "";
 
     switch (typeCurrent) {
-      case 'A1':
+      case "A1":
         const total = await Citizen.count({});
         res.json(total);
         return;
 
-      case 'A2':
-        typeUnit = 'location.city';
+      case "A2":
+        typeUnit = "location.city";
         break;
 
-      case 'A3':
-        typeUnit = 'location.district';
+      case "A3":
+        typeUnit = "location.district";
         break;
 
-      case 'B1':
-        typeUnit = 'location.ward';
+      case "B1":
+        typeUnit = "location.ward";
 
       // case B2 here
 
@@ -271,12 +270,11 @@ const totalCitizens = async (req, res) => {
     } else {
       res.json(0);
     }
-
   } catch (err) {
     console.log(`Delete user error: ${err}`);
     res.status(400).json({ message: "Invalid!" });
   }
-}
+};
 
 const perDateMonitor = async (req, res) => {
   try {
