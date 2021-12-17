@@ -87,7 +87,7 @@ const getVillageByWard = async (req, res) => {
       res.json(arrVillages);
     } else {
       res
-        .status(200)
+        .status(400)
         .json({ msg: "Không thể tìm thấy thôn bản/tổ dân phố nào phù hợp." });
     }
   } catch (err) {
