@@ -58,7 +58,7 @@ const getUnitByCode = async (req, res) => {
   let { username, regency } = req.user;
   let { code } = req.params;
   try {
-    let unit = await Unit.findOne({ code })
+    let unit = await Unit.findOne({ code });
     if (regency === "A1") {
       return res.status(200).json(unit);
     }
@@ -87,7 +87,7 @@ const getVillageByWard = async (req, res) => {
       res.json(arrVillages);
     } else {
       res
-        .status(400)
+        .status(200)
         .json({ msg: "Không thể tìm thấy thôn bản/tổ dân phố nào phù hợp." });
     }
   } catch (err) {
@@ -101,7 +101,7 @@ const createUnit = async (req, res) => {
   const { nameOfUnit, code } = req.body;
   try {
     if (!active) {
-      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+      return res.status(400).json({ msg: "Không trong thời gian khai báo!" });
     }
     let check = await Unit.findOne({ code: code });
     if (check) {
@@ -139,7 +139,6 @@ const createUnit = async (req, res) => {
 
     await newUnit.save();
     res.status(200).json(newUnit);
-
   } catch (err) {
     console.log(`Create unit error: ${err}`);
     res.status(400).json({ msg: "Create error" });
@@ -147,24 +146,24 @@ const createUnit = async (req, res) => {
 };
 
 const updateStatus = async (req, res) => {
-  let { username, regency } = req.user
-  let { idUnit } = req.params
-  let { status } = req.body
+  let { username, regency } = req.user;
+  let { idUnit } = req.params;
+  let { status } = req.body;
   try {
-    if (regency !== 'B1') {
-      return res.status(400).json({ msg: 'Not allowed!' })
+    if (regency !== "B1") {
+      return res.status(400).json({ msg: "Not allowed!" });
     }
-    let unit = await Unit.findById(idUnit)
+    let unit = await Unit.findById(idUnit);
     if (unit.code !== username) {
-      return res.status(400).json({ msg: 'Not allowed!' })
+      return res.status(400).json({ msg: "Not allowed!" });
     }
-    await Unit.findByIdAndUpdate(idUnit, { status })
-    res.status(200).json({ msg: 'Cập nhật thành công!' })
-  } catch(err) {
-    console.log(err)
-    res.status(400).json({ msg: 'Cập nhật hoàn thành lỗi!' })
+    await Unit.findByIdAndUpdate(idUnit, { status });
+    res.status(200).json({ msg: "Cập nhật thành công!" });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ msg: "Cập nhật hoàn thành lỗi!" });
   }
-}
+};
 
 const updateUnitById = async (req, res) => {
   let { username, regency, active } = req.user;
@@ -173,7 +172,7 @@ const updateUnitById = async (req, res) => {
   try {
     //  Kiểm tra có đang trong thời gian khai báo
     if (!active) {
-      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+      return res.status(400).json({ msg: "Không trong thời gian khai báo!" });
     }
 
     //  Kiểm tra có tồn tại Unit với id được gửi lên
@@ -185,23 +184,21 @@ const updateUnitById = async (req, res) => {
     //  Có là Admin
     if (regency === "A1") {
       await Unit.findByIdAndUpdate(idUnit, {
-        nameOfUnit
+        nameOfUnit,
       });
-      await updateUnitCode(oldUnit.code, code)
-      return res
-        .status(200)
-        .json({ msg: "Cập nhật thành công!" });
+      await updateUnitCode(oldUnit.code, code);
+      return res.status(200).json({ msg: "Cập nhật thành công!" });
     }
 
-    //  Kiểm tra Unit cần sửa có phải là Unit con của User hiện tại 
+    //  Kiểm tra Unit cần sửa có phải là Unit con của User hiện tại
     let regex = new RegExp(`^${username}\\d{2}$`);
     if (regex.test(oldUnit.code) && regex.test(code)) {
       let updatedUnit = await Unit.findByIdAndUpdate(idUnit, {
-        nameOfUnit
+        nameOfUnit,
       });
 
       //  Cập nhật mã Unit và tên tài khoản đăng nhập ứng với mỗi Unit
-      await updateUnitCode(oldUnit.code, code)
+      await updateUnitCode(oldUnit.code, code);
 
       res.status(200).json({ msg: "Cập nhật thành công!", data: updatedUnit });
     } else {
@@ -218,10 +215,10 @@ const deleteUnitById = async (req, res) => {
   let { idUnit } = req.params;
   try {
     if (!active) {
-      return res.status(400).json({ msg: 'Không trong thời gian khai báo!' })
+      return res.status(400).json({ msg: "Không trong thời gian khai báo!" });
     }
     if (regency === "A1") {
-      await deleteUnitAndUser(idUnit)
+      await deleteUnitAndUser(idUnit);
       return res.status(200).json({ msg: "Delete successfully" });
     }
     let oldUnit = await Unit.findById(idUnit);
@@ -231,7 +228,7 @@ const deleteUnitById = async (req, res) => {
     let regex = new RegExp(`^${username}\\d{2}$`);
     if (regex.test(oldUnit.code)) {
       // await Unit.findByIdAndDelete(idUnit);
-      await deleteUnitAndUser(idUnit)
+      await deleteUnitAndUser(idUnit);
       res.status(200).json({ msg: "Delete successfully" });
     } else {
       res.status(400).json({ msg: "Not allowed!" });
@@ -243,22 +240,24 @@ const deleteUnitById = async (req, res) => {
 };
 
 const updateUnitCode = async (p_code, new_code) => {
-  let units = await Unit.find({ code: { $regex: p_code + '.*' } })
-  await Promise.all(units.map(async (u) => {
-    let cCode = new_code + u.code.slice(p_code.length)
-    await Unit.findByIdAndUpdate(u._id, { code: cCode })
-    await User.findOneAndUpdate({ username: u.code }, { username: cCode })
-  }))
-}
+  let units = await Unit.find({ code: { $regex: p_code + ".*" } });
+  await Promise.all(
+    units.map(async (u) => {
+      let cCode = new_code + u.code.slice(p_code.length);
+      await Unit.findByIdAndUpdate(u._id, { code: cCode });
+      await User.findOneAndUpdate({ username: u.code }, { username: cCode });
+    })
+  );
+};
 
 const deleteUnitAndUser = async (idUnit) => {
-  let p_unit = await Unit.findById(idUnit)
-  let units = await Unit.find({ code: { $regex: p_unit.code + '.*' } })
-  let idUnits = units.map(u => u._id)
-  let usernames = units.map(u => u.code)
-  await Unit.deleteMany({_id: { $in: idUnits }})
-  await User.deleteMany({ username: { $in: usernames } })
-}
+  let p_unit = await Unit.findById(idUnit);
+  let units = await Unit.find({ code: { $regex: p_unit.code + ".*" } });
+  let idUnits = units.map((u) => u._id);
+  let usernames = units.map((u) => u.code);
+  await Unit.deleteMany({ _id: { $in: idUnits } });
+  await User.deleteMany({ username: { $in: usernames } });
+};
 
 module.exports = {
   getAllUnit,

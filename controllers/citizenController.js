@@ -443,13 +443,11 @@ const citizenCtrl = {
       mapCitizen.forEach((e) => {
         for (let i = 0; i <= 100; i += 5) {
           if (e.age >= i && e.age <= i + 4) {
-            console.log(e.age);
             const str = i;
             if (!statisticAge.hasOwnProperty(str)) {
               statisticAge = {
                 ...statisticAge,
                 [str]: {
-                  id: i,
                   sumMale: 0,
                   sumFemale: 0,
                 },
@@ -459,8 +457,6 @@ const citizenCtrl = {
                 ...statisticAge,
               };
             }
-
-            console.log(statisticAge);
             if (e.gender === "Nam") {
               statisticAge[str].sumMale++;
             } else if (e.gender === "Nữ") {
@@ -470,6 +466,16 @@ const citizenCtrl = {
           }
         }
       });
+
+      for (let [key, value] of Object.entries(statisticAge)) {
+        statisticAge = {
+          ...statisticAge,
+          [key]: {
+            ...statisticAge[key],
+            countCitizens: value.sumFemale + value.sumMale,
+          },
+        };
+      }
 
       const sortObject = (obj) =>
         Object.fromEntries(Object.entries(obj).sort((a, b) => a - b));
