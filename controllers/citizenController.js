@@ -1,5 +1,75 @@
 const Citizen = require("../models/Citizen");
 
+const statisticFunc = ({ city, district, ward, village }) => {
+  let criteria = {};
+
+  if (city) {
+    if (city.includes(",")) {
+      const cityList = city.split(",");
+
+      criteria = {
+        ...criteria,
+        "location.city": { $in: cityList },
+      };
+    } else {
+      criteria = {
+        ...criteria,
+        "location.city": city,
+      };
+    }
+  }
+
+  if (district) {
+    if (district.includes(",")) {
+      const districtList = district.split(",");
+
+      criteria = {
+        ...criteria,
+        "location.district": { $in: districtList },
+      };
+    } else {
+      criteria = {
+        ...criteria,
+        "location.district": district,
+      };
+    }
+  }
+
+  if (ward) {
+    if (ward.includes(",")) {
+      const wardList = ward.split(",");
+
+      criteria = {
+        ...criteria,
+        "location.ward": { $in: wardList },
+      };
+    } else {
+      criteria = {
+        ...criteria,
+        "location.ward": ward,
+      };
+    }
+  }
+
+  if (village) {
+    if (village.includes(",")) {
+      const villageList = village.split(",");
+
+      criteria = {
+        ...criteria,
+        "location.village": { $in: villageList },
+      };
+    } else {
+      criteria = {
+        ...criteria,
+        "location.village": village,
+      };
+    }
+  }
+
+  return criteria;
+};
+
 const citizenCtrl = {
   getAllCitizen: async (req, res) => {
     try {
@@ -51,71 +121,7 @@ const citizenCtrl = {
     const { city, district, ward, village } = location;
 
     try {
-      let criteria = {};
-
-      if (city) {
-        if (city.includes(",")) {
-          const cityList = city.split(",");
-
-          criteria = {
-            ...criteria,
-            "location.city": { $in: cityList },
-          };
-        } else {
-          criteria = {
-            ...criteria,
-            "location.city": city,
-          };
-        }
-      }
-
-      if (district) {
-        if (district.includes(",")) {
-          const districtList = district.split(",");
-
-          criteria = {
-            ...criteria,
-            "location.district": { $in: districtList },
-          };
-        } else {
-          criteria = {
-            ...criteria,
-            "location.district": district,
-          };
-        }
-      }
-
-      if (ward) {
-        if (ward.includes(",")) {
-          const wardList = ward.split(",");
-
-          criteria = {
-            ...criteria,
-            "location.ward": { $in: wardList },
-          };
-        } else {
-          criteria = {
-            ...criteria,
-            "location.ward": ward,
-          };
-        }
-      }
-
-      if (village) {
-        if (village.includes(",")) {
-          const villageList = village.split(",");
-
-          criteria = {
-            ...criteria,
-            "location.village": { $in: villageList },
-          };
-        } else {
-          criteria = {
-            ...criteria,
-            "location.village": village,
-          };
-        }
-      }
+      const criteria = statisticFunc({ city, district, ward, village });
 
       const citizensFound = await Citizen.find(criteria);
 
@@ -361,71 +367,7 @@ const citizenCtrl = {
 
       const { city, district, ward, village } = location;
 
-      let criteria = {};
-
-      if (city) {
-        if (city.includes(",")) {
-          const cityList = city.split(",");
-
-          criteria = {
-            ...criteria,
-            "location.city": { $in: cityList },
-          };
-        } else {
-          criteria = {
-            ...criteria,
-            "location.city": city,
-          };
-        }
-      }
-
-      if (district) {
-        if (district.includes(",")) {
-          const districtList = district.split(",");
-
-          criteria = {
-            ...criteria,
-            "location.district": { $in: districtList },
-          };
-        } else {
-          criteria = {
-            ...criteria,
-            "location.district": district,
-          };
-        }
-      }
-
-      if (ward) {
-        if (ward.includes(",")) {
-          const wardList = ward.split(",");
-
-          criteria = {
-            ...criteria,
-            "location.ward": { $in: wardList },
-          };
-        } else {
-          criteria = {
-            ...criteria,
-            "location.ward": ward,
-          };
-        }
-      }
-
-      if (village) {
-        if (village.includes(",")) {
-          const villageList = village.split(",");
-
-          criteria = {
-            ...criteria,
-            "location.village": { $in: villageList },
-          };
-        } else {
-          criteria = {
-            ...criteria,
-            "location.village": village,
-          };
-        }
-      }
+      const criteria = statisticFunc({ city, district, ward, village });
 
       const citizensFound = await Citizen.find(criteria).select(
         "gender dateOfBirth"
@@ -467,15 +409,20 @@ const citizenCtrl = {
         }
       });
 
+      let totalCitizens = 0;
+
       for (let [key, value] of Object.entries(statisticAge)) {
-        statisticAge = {
-          ...statisticAge,
-          [key]: {
-            ...statisticAge[key],
-            countCitizens: value.sumFemale + value.sumMale,
-          },
-        };
+        // [key]: {
+        //   ...statisticAge[key],
+        //   countCitizens: value.sumFemale + value.sumMale,
+        // },
+        totalCitizens += value.sumMale + value.sumFemale;
       }
+
+      statisticAge = {
+        ...statisticAge,
+        totalCitizens: totalCitizens,
+      };
 
       const sortObject = (obj) =>
         Object.fromEntries(Object.entries(obj).sort((a, b) => a - b));
@@ -483,6 +430,52 @@ const citizenCtrl = {
       statisticAge = sortObject(statisticAge);
 
       res.json(statisticAge);
+    } catch (err) {
+      console.log(`Delete citizen error: ${err}`);
+      res.status(400).json({
+        msg: "Đã có lỗi xảy ra khi xoá thông tin về công dân này.",
+      });
+    }
+  },
+
+  statisticReligion: async (req, res) => {
+    try {
+      const { location } = req.body;
+
+      const { city, district, ward, village } = location;
+
+      const criteria = statisticFunc({ city, district, ward, village });
+
+      const citizensFound = await Citizen.aggregate([
+        { $match: criteria },
+        { $project: { religion: 1 } },
+        { $sortByCount: "$religion" },
+      ]);
+
+      res.json(citizensFound);
+    } catch (err) {
+      console.log(`Delete citizen error: ${err}`);
+      res.status(400).json({
+        msg: "Đã có lỗi xảy ra khi xoá thông tin về công dân này.",
+      });
+    }
+  },
+
+  statisticEthnic: async (req, res) => {
+    try {
+      const { location } = req.body;
+
+      const { city, district, ward, village } = location;
+
+      const criteria = statisticFunc({ city, district, ward, village });
+
+      const citizensFound = await Citizen.aggregate([
+        { $match: criteria },
+        { $project: { ethnic: 1 } },
+        { $sortByCount: "$ethnic" },
+      ]);
+
+      res.json(citizensFound);
     } catch (err) {
       console.log(`Delete citizen error: ${err}`);
       res.status(400).json({
