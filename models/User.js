@@ -26,6 +26,10 @@ const UserSchema = new mongoose.Schema(
     endTime: {
       type: String
     },
+    notifications: {
+      type: Array,
+      default: []
+    }
   },
   {
     timestamps: true,

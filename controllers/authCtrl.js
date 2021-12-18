@@ -24,15 +24,15 @@ const authCtrl = {
       }
 
       //  Set active
-      let { regency, startTime, endTime } = user
+      let { regency, active, startTime, endTime } = user
       if (regency === 'A1') {
         await User.findByIdAndUpdate(user._id, { active: true })
       } else {
-        let now = (new Date()).getTime()
-        if (parseInt(startTime) <= now && parseInt(endTime) >= now) {
-          await User.findByIdAndUpdate(user._id, { active: true })
-        } else {
-          await User.findByIdAndUpdate(user._id, { active: false })
+        if (active === true) {
+          let now = (new Date()).getTime()
+          if (parseInt(endTime) < now) {
+            await User.findByIdAndUpdate(user._id, { active: false })
+          }
         }
       }
 

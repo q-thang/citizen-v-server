@@ -158,6 +158,16 @@ const updateStatus = async (req, res) => {
       return res.status(400).json({ msg: "Not allowed!" });
     }
     await Unit.findByIdAndUpdate(idUnit, { status });
+
+    // pushNotification
+    let p_user = await User.findOne({ username: username.slice(0, 4), regency: 'A3' })
+    if (status === true) {
+      let noti = `Đơn vị ${username} báo cáo: Nhập liệu hoàn thành!`
+      await User.findByIdAndUpdate(p_user._id, { notifications: [ ...p_user.notifications, noti ] })
+    } else {
+      let noti = `Đơn vị ${username} báo cáo lại: Nhập liệu chưa hoàn thành!`
+      await User.findByIdAndUpdate(p_user._id, { notifications: [ ...p_user.notifications, noti ] })
+    }
     res.status(200).json({ msg: "Cập nhật thành công!" });
   } catch (err) {
     console.log(err);

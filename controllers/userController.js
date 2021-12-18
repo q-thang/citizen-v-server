@@ -117,20 +117,32 @@ const updateUserById = async (req, res) => {
         return res.status(400).json({ msg: "Not allowed!" });
       }
     }
+    let noti_message = []
+
+    if (active != user.active) {
+      if (active === true) {
+        noti_message.push(`Cấp trên đã mở quyền khai báo`)
+      } else {
+        noti_message.push(`Cấp trên đã khóa quyền khai báo`)
+      }
+    }
+
     if (newPassword && newPassword !== null) {
       newPassword = await bcript.hash(newPassword, 10);
     } else {
       newPassword = undefined;
     }
-    if (startTime === null) {
+    if (startTime === null || new Date(startTime).getTime().toString() == user.startTime) {
       startTime = undefined;
     } else {
       startTime = new Date(startTime).getTime().toString();
+      noti_message.push(`Thời gian bắt đầu khai báo chuyển thành: ${new Date(parseInt(startTime)).toLocaleString()}`)
     }
-    if (endTime === null) {
+    if (endTime === null || new Date(endTime).getTime().toString() == user.endTime) {
       endTime = undefined;
     } else {
       endTime = new Date(endTime).getTime().toString();
+      noti_message.push(`Thời gian kết thúc khai báo chuyển thành: ${new Date(parseInt(endTime)).toLocaleString()}`)
     }
 
     if (parseInt(startTime) < parseInt(pStartTime)) {
@@ -154,6 +166,11 @@ const updateUserById = async (req, res) => {
       { username: { $regex: updatedUser.username + ".*" } },
       { active, startTime, endTime }
     );
+
+    if (noti_message != []) {
+      await pushNotification(user, noti_message)
+    }
+
     return res.status(200).json(updatedUser);
   } catch (err) {
     console.log(`Update user error: ${err}`);
@@ -344,6 +361,16 @@ const perDateMonitor = async (req, res) => {
   }
 };
 
+const pushNotification = (p_user, message) => {
+  return new Promise(async (next) => {
+    let users = await User.find({ username: { $regex: p_user.username + '.*' } })
+    await Promise.all(users.map( async u => {
+      await User.findByIdAndUpdate(u._id, { notifications: [...u.notifications, ...message] })
+    }))
+    next()
+  })
+}
+
 module.exports = {
   getAllUser,
   getChildUser,
@@ -355,4 +382,5 @@ module.exports = {
   monitorUnits,
   totalCitizens,
   perDateMonitor,
+  pushNotification,
 };
