@@ -43,7 +43,7 @@ const getUserById = async (req, res) => {
   let { idUser } = req.params;
   try {
     let user = await User.findById(idUser);
-    if (regency === "A1") {
+    if (user.username === username || regency === "A1") {
       return res.status(200).json(user);
     }
     let regex = new RegExp(`^${username}\\d{2}$`);
@@ -58,6 +58,17 @@ const getUserById = async (req, res) => {
     res.status(400).json({ message: "Invalid Id user!" });
   }
 };
+
+const getCurrentUser = async (req, res) => {
+  let { _id } = req.user;
+  try {
+    let user = await User.findById(_id);
+    res.status(200).json(user)
+  } catch (err) {
+    console.log(`Get user error: ${err}`);
+    res.status(400).json({ message: "Get user error!" });
+  }
+}
 
 const createUser = async (req, res) => {
   let { regency, active } = req.user;
@@ -375,6 +386,7 @@ module.exports = {
   getAllUser,
   getChildUser,
   getUserById,
+  getCurrentUser,
   createUser,
   updateUserById,
   deleteUserById,

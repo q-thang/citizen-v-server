@@ -11,6 +11,8 @@ router.get('/user/totalCitizens', userCtrl.totalCitizens);
 
 router.get("/user/chartMonitor", userCtrl.perDateMonitor);
 
+router.get("/user/current", userCtrl.getCurrentUser);
+
 router.get("/user/:idUser", userCtrl.getUserById);
 
 router.get("/user", userCtrl.getAllUser);
