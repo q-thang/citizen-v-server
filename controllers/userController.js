@@ -63,7 +63,46 @@ const getCurrentUser = async (req, res) => {
   let { _id } = req.user;
   try {
     let user = await User.findById(_id);
-    res.status(200).json(user)
+
+    let unitOfUser;
+    let unitOfParentUser;
+    let unitOfGrandUser;
+    let unitOfGreatGrandUser;
+
+    unitOfUser = await Unit.findOne({ code: user.username });
+
+    let res_user = {
+      ...user._doc,
+      nameOfUnit: user.regency !== "A1" ? unitOfUser.nameOfUnit : "",
+      password: "",
+    };
+
+    // find parent of current unit
+    if (["A3", "B1", "B2"].includes(user.regency)) {
+      unitOfParentUser = await Unit.findById(unitOfUser.idParent);
+      res_user = {
+        ...res_user,
+        nameOfParentUnit: unitOfParentUser.nameOfUnit,
+      };
+    }
+
+    // find grand of current unit
+    if (["B1", "B2"].includes(user.regency)) {
+      unitOfGrandUser = await Unit.findById(unitOfParentUser.idParent);
+      res_user = { ...res_user, nameOfGrandUnit: unitOfGrandUser.nameOfUnit };
+    }
+
+    // find great grand of current unit
+    if (user.regency === "B2") {
+      unitOfGreatGrandUser = await Unit.findById(unitOfGrandUser.idParent);
+      res_user = {
+        ...res_user,
+        nameOfGreatGrandUnit: unitOfGreatGrandUser.nameOfUnit,
+      };
+    }
+
+
+    res.status(200).json(res_user)
   } catch (err) {
     console.log(`Get user error: ${err}`);
     res.status(400).json({ message: "Get user error!" });
