@@ -162,11 +162,23 @@ const updateStatus = async (req, res) => {
     // pushNotification
     let p_user = await User.findOne({ username: username.slice(0, 4), regency: 'A3' })
     if (status === true) {
-      let noti = `Đơn vị ${username} báo cáo: Nhập liệu hoàn thành!`
-      await User.findByIdAndUpdate(p_user._id, { notifications: [ ...p_user.notifications, noti ] })
+      let noti = { 
+        value: `Đơn vị ${username} báo cáo: Nhập liệu hoàn thành!`,
+        createdAt: new Date().getTime(),
+      }
+      await User.findByIdAndUpdate(p_user._id, {
+        notifications: [ ...p_user.notifications, noti ],
+        newNotification: p_user.newNotification + 1,
+      })
     } else {
-      let noti = `Đơn vị ${username} báo cáo lại: Nhập liệu chưa hoàn thành!`
-      await User.findByIdAndUpdate(p_user._id, { notifications: [ ...p_user.notifications, noti ] })
+      let noti = {
+        value: `Đơn vị ${username} báo cáo lại: Nhập liệu chưa hoàn thành!`,
+        createdAt: new Date().getTime(),
+      }
+      await User.findByIdAndUpdate(p_user._id, {
+        notifications: [ ...p_user.notifications, noti ],
+        newNotification: p_user.newNotification + 1,
+      })
     }
     res.status(200).json({ msg: "Cập nhật thành công!" });
   } catch (err) {
