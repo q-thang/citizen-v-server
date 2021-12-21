@@ -35,6 +35,8 @@ router.post("/citizen/statistic/religion", citizenCtrl.statisticReligion);
 
 router.post("/citizen/statistic/ethnic", citizenCtrl.statisticEthnic);
 
+router.post("/citizen/statistic/occupation", citizenCtrl.statisticOccupation);
+
 // @route PATCH /api/citizen/:idCitizen
 // @desc Update the info of a citizen by ID code
 // access Private
