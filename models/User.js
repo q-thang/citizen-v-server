@@ -26,9 +26,20 @@ const UserSchema = new mongoose.Schema(
     endTime: {
       type: String
     },
-    notifications: {
-      type: Array,
-      default: []
+    notifications: [
+      {
+        value: {
+          type: String,
+        },
+        createdAt: {
+          type: Number,
+          default: new Date().getTime(),
+        },
+      },
+    ],
+    newNotification: {
+      type: Number,
+      default: 0
     }
   },
   {
