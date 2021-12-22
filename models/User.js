@@ -21,15 +21,22 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
     },
     startTime: {
-      type: String
+      type: String,
     },
     endTime: {
-      type: String
+      type: String,
     },
-    notifications: {
-      type: Array,
-      default: []
-    }
+    notifications: [
+      {
+        textValue: {
+          type: String,
+        },
+        createNotiAt: {
+          type: Date,
+          default: new Date(),
+        },
+      },
+    ],
   },
   {
     timestamps: true,

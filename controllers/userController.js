@@ -51,7 +51,7 @@ const getUserById = async (req, res) => {
     if (regex.test(user.username) && user.regency === child_regency) {
       res.status(200).json(user);
     } else {
-      res.status(400).json({ msg: "Not allowed!" });
+      res.status(400).json({ msg: "Đơn vị không được phép thực hiện!" });
     }
   } catch (err) {
     console.log(`Get user error: ${err}`);
@@ -101,13 +101,12 @@ const getCurrentUser = async (req, res) => {
       };
     }
 
-
-    res.status(200).json(res_user)
+    res.status(200).json(res_user);
   } catch (err) {
     console.log(`Get user error: ${err}`);
     res.status(400).json({ message: "Get user error!" });
   }
-}
+};
 
 const createUser = async (req, res) => {
   let { regency, active } = req.user;
@@ -164,16 +163,18 @@ const updateUserById = async (req, res) => {
     if (regency !== "A1") {
       let regex = new RegExp(`^${username}\\d{2}$`);
       if (!regex.test(user.username)) {
-        return res.status(400).json({ msg: "Not allowed!" });
+        return res
+          .status(400)
+          .json({ msg: "Đơn vị không được phép thực hiện!" });
       }
     }
-    let noti_message = []
+    let noti_message = [];
 
     if (active != user.active) {
       if (active === true) {
-        noti_message.push(`Cấp trên đã mở quyền khai báo`)
+        noti_message.push(`Cấp trên đã mở quyền khai báo`);
       } else {
-        noti_message.push(`Cấp trên đã khóa quyền khai báo`)
+        noti_message.push(`Cấp trên đã khóa quyền khai báo`);
       }
     }
 
@@ -182,17 +183,31 @@ const updateUserById = async (req, res) => {
     } else {
       newPassword = undefined;
     }
-    if (startTime === null || new Date(startTime).getTime().toString() == user.startTime) {
+    if (
+      startTime === null ||
+      new Date(startTime).getTime().toString() == user.startTime
+    ) {
       startTime = undefined;
     } else {
       startTime = new Date(startTime).getTime().toString();
-      noti_message.push(`Thời gian bắt đầu khai báo chuyển thành: ${new Date(parseInt(startTime)).toLocaleString()}`)
+      noti_message.push(
+        `Thời gian bắt đầu khai báo chuyển thành: ${new Date(
+          parseInt(startTime)
+        ).toLocaleString()}`
+      );
     }
-    if (endTime === null || new Date(endTime).getTime().toString() == user.endTime) {
+    if (
+      endTime === null ||
+      new Date(endTime).getTime().toString() == user.endTime
+    ) {
       endTime = undefined;
     } else {
       endTime = new Date(endTime).getTime().toString();
-      noti_message.push(`Thời gian kết thúc khai báo chuyển thành: ${new Date(parseInt(endTime)).toLocaleString()}`)
+      noti_message.push(
+        `Thời gian kết thúc khai báo chuyển thành: ${new Date(
+          parseInt(endTime)
+        ).toLocaleString()}`
+      );
     }
 
     if (parseInt(startTime) < parseInt(pStartTime)) {
@@ -218,13 +233,13 @@ const updateUserById = async (req, res) => {
     );
 
     if (noti_message != []) {
-      await pushNotification(user, noti_message)
+      await pushNotification(user, noti_message);
     }
 
     return res.status(200).json(updatedUser);
   } catch (err) {
     console.log(`Update user error: ${err}`);
-    res.status(400).json({ message: "Update error" });
+    res.status(400).json({ message: "Cập nhật lỗi!" });
   }
 };
 
@@ -239,11 +254,13 @@ const deleteUserById = async (req, res) => {
     if (regency !== "A1") {
       let regex = new RegExp(`^${username}\\d{2}$`);
       if (!regex.test(user.username)) {
-        return res.status(400).json({ msg: "Not allowed!" });
+        return res
+          .status(400)
+          .json({ msg: "Đơn vị không được phép thực hiện!" });
       }
     }
     await User.findByIdAndDelete(idUser);
-    res.status(200).json({ message: "Delete successfully!" });
+    res.status(200).json({ message: "Xoá thành công!" });
   } catch (err) {
     console.log(`Delete user error: ${err}`);
     res.status(400).json({ message: "Invalid Id user!" });
@@ -413,13 +430,19 @@ const perDateMonitor = async (req, res) => {
 
 const pushNotification = (p_user, message) => {
   return new Promise(async (next) => {
-    let users = await User.find({ username: { $regex: p_user.username + '.*' } })
-    await Promise.all(users.map( async u => {
-      await User.findByIdAndUpdate(u._id, { notifications: [...u.notifications, ...message] })
-    }))
-    next()
-  })
-}
+    let users = await User.find({
+      username: { $regex: p_user.username + ".*" },
+    });
+    await Promise.all(
+      users.map(async (u) => {
+        await User.findByIdAndUpdate(u._id, {
+          notifications: [...u.notifications, ...message],
+        });
+      })
+    );
+    next();
+  });
+};
 
 module.exports = {
   getAllUser,
