@@ -50,7 +50,15 @@ const CitizenSchema = new mongoose.Schema(
     },
     occupation: {
       type: String,
-      required: true,
+      required: function () {
+        const age =
+          new Date().getFullYear() - parseInt(this.dateOfBirth.slice(-4));
+
+        if (age < 6) {
+          return false;
+        }
+        return true;
+      },
     },
     ethnic: {
       type: String,

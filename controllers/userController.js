@@ -149,13 +149,19 @@ const createUser = async (req, res) => {
 };
 
 const updateUserById = async (req, res) => {
-  let { username, regency } = req.user;
+  let { _id, username, regency } = req.user;
   let pStartTime = req.user.startTime;
   let pEndTime = req.user.endTime;
   let pActive = req.user.active;
   let { idUser } = req.params;
-  let { newPassword, active, startTime, endTime } = req.body;
+  let { newPassword, active, startTime, endTime, newNotification } = req.body;
   try {
+    //  Seen notification
+    if (newNotification === 0) {
+      await User.findByIdAndUpdate(_id, { newNotification });
+      return res.status(200).json({ msg: "Success" });
+    }
+
     if (!pActive) {
       return res.status(400).json({ msg: "Không trong thời gian khai báo!" });
     }
@@ -172,9 +178,15 @@ const updateUserById = async (req, res) => {
 
     if (active != user.active) {
       if (active === true) {
-        noti_message.push(`Cấp trên đã mở quyền khai báo`);
+        noti_message.push({
+          value: `Cấp trên đã mở quyền khai báo`,
+          createdAt: new Date().getTime(),
+        });
       } else {
-        noti_message.push(`Cấp trên đã khóa quyền khai báo`);
+        noti_message.push({
+          value: `Cấp trên đã khóa quyền khai báo`,
+          createdAt: new Date().getTime(),
+        });
       }
     }
 
@@ -190,11 +202,12 @@ const updateUserById = async (req, res) => {
       startTime = undefined;
     } else {
       startTime = new Date(startTime).getTime().toString();
-      noti_message.push(
-        `Thời gian bắt đầu khai báo chuyển thành: ${new Date(
+      noti_message.push({
+        value: `Thời gian bắt đầu khai báo chuyển thành: ${new Date(
           parseInt(startTime)
-        ).toLocaleString()}`
-      );
+        ).toLocaleString()}`,
+        createdAt: new Date().getTime(),
+      });
     }
     if (
       endTime === null ||
@@ -203,11 +216,12 @@ const updateUserById = async (req, res) => {
       endTime = undefined;
     } else {
       endTime = new Date(endTime).getTime().toString();
-      noti_message.push(
-        `Thời gian kết thúc khai báo chuyển thành: ${new Date(
+      noti_message.push({
+        value: `Thời gian kết thúc khai báo chuyển thành: ${new Date(
           parseInt(endTime)
-        ).toLocaleString()}`
-      );
+        ).toLocaleString()}`,
+        createdAt: new Date().getTime(),
+      });
     }
 
     if (parseInt(startTime) < parseInt(pStartTime)) {
@@ -437,6 +451,7 @@ const pushNotification = (p_user, message) => {
       users.map(async (u) => {
         await User.findByIdAndUpdate(u._id, {
           notifications: [...u.notifications, ...message],
+          newNotification: u.newNotification + message.length,
         });
       })
     );

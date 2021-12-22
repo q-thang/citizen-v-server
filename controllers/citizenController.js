@@ -283,8 +283,6 @@ const citizenCtrl = {
         msg: "Đã khai báo thành công công dân này!",
         newCitizen: newCitizen,
       });
-
-      console.log(res);
     } catch (err) {
       console.log(`Create citizen error: ${err}`);
       res.status(400).json({
@@ -476,6 +474,90 @@ const citizenCtrl = {
       ]);
 
       res.json(citizensFound);
+    } catch (err) {
+      console.log(`Delete citizen error: ${err}`);
+      res.status(400).json({
+        msg: "Đã có lỗi xảy ra khi xoá thông tin về công dân này.",
+      });
+    }
+  },
+
+  statisticOccupation: async (req, res) => {
+    try {
+      const { location } = req.body;
+
+      const { city, district, ward, village } = location;
+
+      let criteria = statisticFunc({ city, district, ward, village });
+
+      criteria = {
+        ...criteria,
+        occupation: { $ne: "" },
+      };
+
+      // Top 10 occupations
+      const topTenOccupation = await Citizen.aggregate([
+        { $match: criteria },
+        { $project: { occupation: 1 } },
+        { $sortByCount: "$occupation" },
+        { $limit: 10 },
+      ]);
+
+      // Stats of the workforce
+      const totalCitizens = await Citizen.aggregate([
+        { $match: criteria },
+        { $count: "total_citizens" },
+      ]);
+
+      const citizensFound = await Citizen.find(criteria).select(
+        "occupation dateOfBirth"
+      );
+
+      let total15To60 = 0;
+      let totalU15 = 0;
+      let totalA60 = 0;
+
+      let total15To60Unemployed = 0;
+      let totalU15Work = 0;
+      let totalA60Work = 0;
+
+      for (let i = 0; i < citizensFound.length; i++) {
+        let tempAge =
+          new Date().getFullYear() -
+          parseInt(citizensFound[i].dateOfBirth.slice(-4));
+        let tempOccupation = citizensFound[i].occupation;
+
+        if (tempAge > 60) {
+          totalA60++;
+          if (tempOccupation !== "Nghỉ hưu") {
+            totalA60Work++;
+          }
+        } else if (tempAge < 15) {
+          totalU15++;
+          if (
+            tempOccupation !== "Trẻ em dưới 6 tuổi" &&
+            tempOccupation !== "Học sinh"
+          ) {
+            totalU15Work++;
+          }
+        } else {
+          total15To60++;
+          if (tempOccupation === "Tự do") {
+            total15To60Unemployed++;
+          }
+        }
+      }
+
+      res.json({
+        topTenOccupation,
+        statsWorkforce: {
+          total15To60,
+          totalCitizens: totalCitizens[0].total_citizens,
+        },
+        statsUnemployed: { total15To60Unemployed, total15To60 },
+        statsU15Work: { totalU15Work, totalU15 },
+        statsA60Work: { totalA60Work, totalA60 },
+      });
     } catch (err) {
       console.log(`Delete citizen error: ${err}`);
       res.status(400).json({

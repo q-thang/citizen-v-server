@@ -9,7 +9,7 @@ const getAllUnit = async (req, res) => {
       let units = await Unit.find({});
       res.status(200).json(units);
     } else {
-      res.status(400).json({ msg: "Not allowed!" });
+      res.status(400).json({ msg: "Đơn vị không được phép thực hiện!" });
     }
   } catch (err) {
     console.log(`Get all unit error: ${err}`);
@@ -46,7 +46,7 @@ const getUnitById = async (req, res) => {
     if (username === unit.code || regex.test(unit.code)) {
       res.status(200).json(unit);
     } else {
-      res.status(400).json({ msg: "Not allowed!" });
+      res.status(400).json({ msg: "Đơn vị không được phép thực hiện!" });
     }
   } catch (err) {
     console.log(`Get unit error: ${err}`);
@@ -66,7 +66,7 @@ const getUnitByCode = async (req, res) => {
     if (username === unit.code || regex.test(unit.code)) {
       res.status(200).json(unit);
     } else {
-      res.status(400).json({ msg: "Not allowed!" });
+      res.status(400).json({ msg: "Đơn vị không được phép thực hiện!" });
     }
   } catch (err) {
     console.log(`Get unit error: ${err}`);
@@ -151,22 +151,37 @@ const updateStatus = async (req, res) => {
   let { status } = req.body;
   try {
     if (regency !== "B1") {
-      return res.status(400).json({ msg: "Not allowed!" });
+      return res.status(400).json({ msg: "Đơn vị không được phép thực hiện!" });
     }
     let unit = await Unit.findById(idUnit);
     if (unit.code !== username) {
-      return res.status(400).json({ msg: "Not allowed!" });
+      return res.status(400).json({ msg: "Đơn vị không được phép thực hiện!" });
     }
     await Unit.findByIdAndUpdate(idUnit, { status });
 
     // pushNotification
-    let p_user = await User.findOne({ username: username.slice(0, 4), regency: 'A3' })
+    let p_user = await User.findOne({
+      username: username.slice(0, 4),
+      regency: "A3",
+    });
     if (status === true) {
-      let noti = `Đơn vị ${username} báo cáo: Nhập liệu hoàn thành!`
-      await User.findByIdAndUpdate(p_user._id, { notifications: [ ...p_user.notifications, noti ] })
+      let noti = {
+        value: `Đơn vị ${username} báo cáo: Nhập liệu hoàn thành!`,
+        createdAt: new Date().getTime(),
+      };
+      await User.findByIdAndUpdate(p_user._id, {
+        notifications: [...p_user.notifications, noti],
+        newNotification: p_user.newNotification + 1,
+      });
     } else {
-      let noti = `Đơn vị ${username} báo cáo lại: Nhập liệu chưa hoàn thành!`
-      await User.findByIdAndUpdate(p_user._id, { notifications: [ ...p_user.notifications, noti ] })
+      let noti = {
+        value: `Đơn vị ${username} báo cáo lại: Nhập liệu chưa hoàn thành!`,
+        createdAt: new Date().getTime(),
+      };
+      await User.findByIdAndUpdate(p_user._id, {
+        notifications: [...p_user.notifications, noti],
+        newNotification: p_user.newNotification + 1,
+      });
     }
     res.status(200).json({ msg: "Cập nhật thành công!" });
   } catch (err) {
@@ -212,7 +227,7 @@ const updateUnitById = async (req, res) => {
 
       res.status(200).json({ msg: "Cập nhật thành công!", data: updatedUnit });
     } else {
-      res.status(400).json({ msg: "Not allowed!" });
+      res.status(400).json({ msg: "Đơn vị không được phép thực hiện!" });
     }
   } catch (err) {
     console.log(`Update unit error: ${err}`);
@@ -241,7 +256,7 @@ const deleteUnitById = async (req, res) => {
       await deleteUnitAndUser(idUnit);
       res.status(200).json({ msg: "Delete successfully" });
     } else {
-      res.status(400).json({ msg: "Not allowed!" });
+      res.status(400).json({ msg: "Đơn vị không được phép thực hiện!" });
     }
   } catch (err) {
     console.log(`Delete unit error: ${err}`);

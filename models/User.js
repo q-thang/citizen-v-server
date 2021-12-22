@@ -28,15 +28,19 @@ const UserSchema = new mongoose.Schema(
     },
     notifications: [
       {
-        textValue: {
+        value: {
           type: String,
         },
-        createNotiAt: {
-          type: Date,
-          default: new Date(),
+        createdAt: {
+          type: Number,
+          default: new Date().getTime(),
         },
       },
     ],
+    newNotification: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
