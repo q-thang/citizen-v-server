@@ -99,7 +99,7 @@ const citizenCtrl = {
       const { identifiedCode, phoneNumber } = req.body;
 
       const citizenFound = await Citizen.find({
-        $or: [{ identifiedCode: identifiedCode }, { phoneNumber: phoneNumber }],
+        $or: [{ identifiedCode: identifiedCode }],
       });
 
       if (!citizenFound) {
@@ -141,6 +141,7 @@ const citizenCtrl = {
       ethnic,
       religion,
       location,
+      identifiedCode,
     } = req.body;
 
     try {
@@ -159,6 +160,13 @@ const citizenCtrl = {
           criteria = {
             ...criteria,
             "location.district": district,
+          };
+        }
+
+        if (identifiedCode) {
+          criteria = {
+            ...criteria,
+            identifiedCode: identifiedCode,
           };
         }
 
