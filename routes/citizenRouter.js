@@ -40,7 +40,7 @@ router.post("/citizen/statistic/occupation", citizenCtrl.statisticOccupation);
 // @route PATCH /api/citizen/:idCitizen
 // @desc Update the info of a citizen by ID code
 // access Private
-router.patch("/citizen/:idCitizen", citizenCtrl.updateCitizenById);
+router.put("/citizen/:idCitizen", citizenCtrl.updateCitizenById);
 
 // @route DELETE /api/citizen/:idCitizen
 // @desc Remove a citizen

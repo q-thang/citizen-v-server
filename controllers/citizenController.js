@@ -314,35 +314,44 @@ const citizenCtrl = {
       ethnic,
       religion,
       idUnit,
+      location,
     } = req.body;
 
     try {
       if (!active) {
         return res.status(400).json({ msg: "Không trong thời gian khai báo!" });
       }
-      const current_citizen = await Citizen.findById(req.params.idCitizen);
 
-      if (identifiedCode !== current_citizen.identifiedCode) {
-        const existed_idCode = await Citizen.findOne({ identifiedCode });
+      if (identifiedCode) {
+        const foundDuplicateID = await Citizen.findOne({
+          identifiedCode: identifiedCode,
+        });
 
-        if (existed_idCode) {
+        if (
+          foundDuplicateID &&
+          req.params.idCitizen !== foundDuplicateID._id.toString()
+        ) {
           return res
             .status(400)
             .json({ msg: "Đã tồn tại công dân có CCCD này." });
         }
       }
 
-      if (phoneNumber !== current_citizen.phoneNumber) {
-        const existed_phoneNumber = await Citizen.findOne({ phoneNumber });
-
-        if (existed_phoneNumber) {
+      if (phoneNumber) {
+        const foundDuplicatePhone = await Citizen.find({
+          phoneNumber: phoneNumber,
+        });
+        if (
+          foundDuplicatePhone &&
+          req.params.idCitizen !== foundDuplicatePhone._id.toString()
+        ) {
           return res
             .status(400)
             .json({ msg: "Đã tồn tại công dân có số điện thoại này." });
         }
       }
 
-      await Citizen.findByIdAndUpdate(req.params.idCitizen, {
+      const resData = await Citizen.findByIdAndUpdate(req.params.idCitizen, {
         fullName,
         dateOfBirth,
         currentAddress,
@@ -356,9 +365,14 @@ const citizenCtrl = {
         ethnic,
         religion,
         idUnit,
+        location,
       });
 
-      res.status(200).json({ msg: "Đã cập nhật thành công công dân này!" });
+      res.status(200).json({
+        updateCitizen: resData,
+        updated: true,
+        msg: "Đã cập nhật thành công công dân này!",
+      });
     } catch (err) {
       console.log(`Update citizen error: ${err}`);
       res.status(400).json({
@@ -581,7 +595,9 @@ const citizenCtrl = {
         return res.status(400).json({ msg: "Không trong thời gian khai báo!" });
       }
       await Citizen.findByIdAndDelete(req.params.idCitizen);
-      res.status(200).json({ msg: "Đã xoá thành công công dân này!" });
+      res
+        .status(200)
+        .json({ deleted: true, msg: "Đã xoá thành công công dân này!" });
     } catch (err) {
       console.log(`Delete citizen error: ${err}`);
       res.status(400).json({
