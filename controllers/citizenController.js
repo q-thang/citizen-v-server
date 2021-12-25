@@ -340,8 +340,8 @@ const citizenCtrl = {
           req.params.idCitizen !== foundDuplicateID._id.toString()
         ) {
           return res
-            .status(400)
-            .json({ msg: "Đã tồn tại công dân có CCCD này." });
+            .status(200)
+            .json({ updated: false, msg: "Đã tồn tại công dân có CCCD này." });
         }
       }
 
@@ -353,9 +353,10 @@ const citizenCtrl = {
           foundDuplicatePhone &&
           req.params.idCitizen !== foundDuplicatePhone._id.toString()
         ) {
-          return res
-            .status(400)
-            .json({ msg: "Đã tồn tại công dân có số điện thoại này." });
+          return res.status(200).json({
+            updated: false,
+            msg: "Đã tồn tại công dân có số điện thoại này.",
+          });
         }
       }
 
