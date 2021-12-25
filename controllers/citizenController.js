@@ -609,6 +609,7 @@ const citizenCtrl = {
     } catch (err) {
       console.log(`Delete citizen error: ${err}`);
       res.status(400).json({
+        deleted: false,
         msg: "Đã có lỗi xảy ra khi xoá thông tin về công dân này.",
       });
     }
