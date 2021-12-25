@@ -269,7 +269,11 @@ const citizenCtrl = {
 
       const existed_idCode = await Citizen.findOne({ identifiedCode });
 
-      if (existed_idCode && existed_idCode.identifiedCode !== "") {
+      if (
+        identifiedCode &&
+        existed_idCode &&
+        existed_idCode.identifiedCode !== ""
+      ) {
         return res.status(200).json({
           success: false,
           msg: "Đã tồn tại công dân có CCCD này.",
@@ -278,7 +282,11 @@ const citizenCtrl = {
 
       const existed_phoneNumber = await Citizen.findOne({ phoneNumber });
 
-      if (existed_phoneNumber && existed_phoneNumber.phoneNumber !== "") {
+      if (
+        phoneNumber &&
+        existed_phoneNumber &&
+        existed_phoneNumber.phoneNumber !== ""
+      ) {
         return res.status(200).json({
           sucess: false,
           msg: "Đã tồn tại công dân có số điện thoại này.",
